@@ -1,0 +1,18 @@
+# Entorno virtual
+venv/
+ENV/
+env/
+
+# Python basura
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# SECRETOS (Muy importante)
+firebase_credentials.json
+.env
+
+# IDEs
+.vscode/
+.idea/

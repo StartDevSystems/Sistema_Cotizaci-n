@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotizaciones - BlueSky Energy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --bluesky-dark-blue: #0d2a42;
+            --bluesky-light-blue: #2cb0e8;
+        }
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar-brand img {
+            max-height: 40px;
+        }
+        .bg-primary { background-color: var(--bluesky-dark-blue) !important; }
+        .btn-primary { background-color: var(--bluesky-dark-blue); border-color: var(--bluesky-dark-blue); }
+        .btn-primary:hover { background-color: #0a2033; border-color: #0a2033; }
+        .text-primary { color: var(--bluesky-dark-blue) !important; }
+        
+        .cotizacion-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+        .cotizacion-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+        .quote-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--bluesky-dark-blue);
+        }
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, var(--bluesky-dark-blue), var(--bluesky-light-blue));
+            color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .stat-card h3 {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0;
+        }
+        .stat-card p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        .badge-expirada {
+            background-color: #dc3545;
+        }
+        .badge-reciente {
+            background-color: #28a745;
+        }
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+        .cotizacion-card:hover .delete-btn {
+            opacity: 1;
+        }
+        .filter-section {
+            background-color: #fff;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .estado-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="BlueSky Energy Logo" class="me-2">
+                <span class="fs-5">BlueSky Energy</span>
+            </a>
+            <div class="d-flex gap-2">
+                <a href="/dashboard" class="btn btn-outline-light">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="/cotizaciones" class="btn btn-light">
+                    <i class="bi bi-list-ul"></i> Cotizaciones
+                </a>
+                <a href="/clientes" class="btn btn-outline-light">
+                    <i class="bi bi-people"></i> Clientes
+                </a>
+                <a href="/" class="btn btn-outline-light">
+                    <i class="bi bi-plus-circle"></i> Nueva
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4 mb-5">
+        <!-- ESTADÍSTICAS -->
+        <div class="row g-3 mb-4" id="stats-section" style="display: none;">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h3 id="stat-total">0</h3>
+                    <p>Total Cotizaciones</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h3 id="stat-monto">$0</h3>
+                    <p>Monto Total</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h3 id="stat-promedio">$0</h3>
+                    <p>Promedio</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h3 id="stat-mes">0</h3>
+                    <p>Este Mes</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-lg">
+            <div class="card-header bg-light">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h4 class="mb-0 text-primary">Cotizaciones Guardadas</h4>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control" id="search-input" placeholder="Buscar cliente o número...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FILTROS AVANZADOS -->
+            <div class="card-body">
+                <div class="filter-section">
+                    <div class="row g-3">
+                        <div class="col-md-2">
+                            <label class="form-label small">Fecha Desde:</label>
+                            <input type="date" class="form-control form-control-sm" id="fecha-desde">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small">Fecha Hasta:</label>
+                            <input type="date" class="form-control form-control-sm" id="fecha-hasta">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small">Estado:</label>
+                            <select class="form-select form-select-sm" id="filter-estado">
+                                <option value="">Todos</option>
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="Aprobada">Aprobada</option>
+                                <option value="Rechazada">Rechazada</option>
+                                <option value="En Revisión">En Revisión</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small">Ordenar por:</label>
+                            <select class="form-select form-select-sm" id="sort-select">
+                                <option value="reciente">Más Reciente</option>
+                                <option value="antigua">Más Antigua</option>
+                                <option value="mayor">Mayor Valor</option>
+                                <option value="menor">Menor Valor</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button class="btn btn-sm btn-secondary w-100" id="reset-filters">
+                                <i class="bi bi-arrow-counterclockwise"></i> Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="loading" class="loading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-3">Cargando cotizaciones...</p>
+                </div>
+                
+                <div id="no-results" style="display: none;" class="text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+                    <p class="text-muted mt-3">No se encontraron cotizaciones</p>
+                </div>
+
+                <div id="cotizaciones-container" class="row g-3" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE DETALLES -->
+    <div class="modal fade" id="detalleModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-file-text"></i> Detalles de Cotización
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modal-body-content"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CAMBIAR ESTADO -->
+    <div class="modal fade" id="estadoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Cambiar Estado</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="cotizacion-id-estado">
+                    <div class="mb-3">
+                        <label class="form-label">Nuevo Estado:</label>
+                        <select class="form-select" id="nuevo-estado">
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="Aprobada">Aprobada</option>
+                            <option value="Rechazada">Rechazada</option>
+                            <option value="En Revisión">En Revisión</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notas (opcional):</label>
+                        <textarea class="form-control" id="notas-estado" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btn-guardar-estado">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let todasLasCotizaciones = [];
+        let cotizacionesFiltradas = [];
+
+        function formatCurrency(value) {
+            const num = typeof value === 'string' ? parseFloat(value.replace('$', '').replace(',', '')) : value;
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(num);
+        }
+
+        function formatDate(dateStr) {
+            const [year, month, day] = dateStr.split('-');
+            return `${day}/${month}/${year}`;
+        }
+
+        function calcularEstadisticas(cotizaciones) {
+            const total = cotizaciones.length;
+            const montoTotal = cotizaciones.reduce((sum, cot) => {
+                const valor = parseFloat(cot.total.replace('$', '').replace(',', ''));
+                return sum + valor;
+            }, 0);
+            const promedio = total > 0 ? montoTotal / total : 0;
+            
+            const hoy = new Date();
+            const esteMes = cotizaciones.filter(cot => {
+                const fecha = new Date(cot.fecha);
+                return fecha.getMonth() === hoy.getMonth() && fecha.getFullYear() === hoy.getFullYear();
+            }).length;
+
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-monto').textContent = formatCurrency(montoTotal);
+            document.getElementById('stat-promedio').textContent = formatCurrency(promedio);
+            document.getElementById('stat-mes').textContent = esteMes;
+            document.getElementById('stats-section').style.display = 'flex';
+        }
+
+        function verificarEstado(fecha) {
+            const fechaCotizacion = new Date(fecha);
+            const hoy = new Date();
+            const diferenciaDias = Math.floor((hoy - fechaCotizacion) / (1000 * 60 * 60 * 24));
+            
+            if (diferenciaDias <= 7) {
+                return '<span class="badge badge-reciente ms-1">Reciente</span>';
+            } else if (diferenciaDias > 15) {
+                return '<span class="badge badge-expirada ms-1">Expirada</span>';
+            }
+            return '';
+        }
+
+        function getEstadoBadge(estado) {
+            const badges = {
+                'Pendiente': 'bg-warning text-dark',
+                'Aprobada': 'bg-success',
+                'Rechazada': 'bg-danger',
+                'En Revisión': 'bg-info'
+            };
+            return `<span class="badge ${badges[estado] || 'bg-secondary'} estado-badge">${estado}</span>`;
+        }
+
+        function mostrarDetalles(cotizacionId) {
+            const cot = todasLasCotizaciones.find(c => c.id === cotizacionId);
+            if (!cot) return;
+
+            let itemsHtml = '<h6 class="mt-3">Items:</h6><ul>';
+            cot.items.forEach(item => {
+                itemsHtml += `<li><strong>${item.descripcion}</strong> - Cant: ${item.cantidad} x ${formatCurrency(item.precio)} = ${formatCurrency(item.cantidad * item.precio)}</li>`;
+            });
+            itemsHtml += '</ul>';
+
+            const modalContent = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Número:</strong> ${String(cot.quote_number).padStart(3, '0')}</p>
+                        <p><strong>Cliente:</strong> ${cot.cliente}</p>
+                        <p><strong>Fecha:</strong> ${formatDate(cot.fecha)}</p>
+                        <p><strong>Estado:</strong> ${getEstadoBadge(cot.estado)}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Total:</strong> <span class="fs-4 text-primary">${cot.total}</span></p>
+                        ${verificarEstado(cot.fecha)}
+                        ${cot.notas ? `<p class="mt-2"><strong>Notas:</strong><br>${cot.notas}</p>` : ''}
+                    </div>
+                </div>
+                ${itemsHtml}
+                <hr>
+                <div class="text-center">
+                    <a href="/descargar-pdf/${cot.id}" target="_blank" class="btn btn-danger">
+                        <i class="bi bi-file-pdf"></i> PDF
+                    </a>
+                    <a href="/descargar-excel/${cot.id}" class="btn btn-success">
+                        <i class="bi bi-file-excel"></i> Excel
+                    </a>
+                </div>
+            `;
+            document.getElementById('modal-body-content').innerHTML = modalContent;
+            new bootstrap.Modal(document.getElementById('detalleModal')).show();
+        }
+
+        function cambiarEstado(cotizacionId) {
+            const cot = todasLasCotizaciones.find(c => c.id === cotizacionId);
+            if (!cot) return;
+
+            document.getElementById('cotizacion-id-estado').value = cotizacionId;
+            document.getElementById('nuevo-estado').value = cot.estado;
+            document.getElementById('notas-estado').value = cot.notas || '';
+            
+            new bootstrap.Modal(document.getElementById('estadoModal')).show();
+        }
+
+        document.getElementById('btn-guardar-estado').addEventListener('click', function() {
+            const cotizacionId = document.getElementById('cotizacion-id-estado').value;
+            const nuevoEstado = document.getElementById('nuevo-estado').value;
+            const notas = document.getElementById('notas-estado').value;
+
+            fetch(`/api/cotizaciones/${cotizacionId}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ estado: nuevoEstado, notas: notas })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    alert('Estado actualizado');
+                    bootstrap.Modal.getInstance(document.getElementById('estadoModal')).hide();
+                    location.reload();
+                }
+            });
+        });
+
+        function eliminarCotizacion(cotizacionId, quote_number) {
+            if (!confirm(`¿Estás seguro de eliminar la Cotización Nº ${String(quote_number).padStart(3, '0')}?`)) {
+                return;
+            }
+
+            fetch(`/api/cotizaciones/${cotizacionId}`, { method: 'DELETE' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        alert('Cotización eliminada');
+                        location.reload();
+                    }
+                })
+                .catch(error => alert('Error al eliminar'));
+        }
+
+        function duplicarCotizacion(cotizacionId) {
+            if (!confirm('¿Deseas duplicar esta cotización?')) return;
+
+            fetch(`/api/cotizaciones/${cotizacionId}/duplicar`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        alert(data.message);
+                        location.reload();
+                    }
+                })
+                .catch(error => alert('Error al duplicar'));
+        }
+
+        function renderCotizaciones(cotizaciones) {
+            const container = document.getElementById('cotizaciones-container');
+            const loading = document.getElementById('loading');
+            const noResults = document.getElementById('no-results');
+
+            loading.style.display = 'none';
+
+            if (cotizaciones.length === 0) {
+                container.style.display = 'none';
+                noResults.style.display = 'block';
+                return;
+            }
+
+            noResults.style.display = 'none';
+            container.style.display = 'flex';
+            container.innerHTML = '';
+
+            cotizaciones.forEach(cot => {
+                const card = document.createElement('div');
+                card.className = 'col-md-6 col-lg-4';
+                card.innerHTML = `
+                    <div class="card cotizacion-card h-100">
+                        <button class="btn btn-danger btn-sm delete-btn" onclick="eliminarCotizacion('${cot.id}', ${cot.quote_number})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <span class="badge bg-primary">Nº ${String(cot.quote_number).padStart(3, '0')}</span>
+                                    ${getEstadoBadge(cot.estado)}
+                                    ${verificarEstado(cot.fecha)}
+                                    <p class="text-muted small mb-0 mt-1">${formatDate(cot.fecha)}</p>
+                                </div>
+                                <h4 class="quote-number mb-0">${cot.total}</h4>
+                            </div>
+                            <h5 class="card-title text-truncate" title="${cot.cliente}">
+                                <i class="bi bi-person-circle text-primary"></i> ${cot.cliente}
+                            </h5>
+                            <div class="d-grid gap-2 mt-3">
+                                <button class="btn btn-sm btn-outline-primary" onclick="mostrarDetalles('${cot.id}')">
+                                    <i class="bi bi-eye"></i> Ver Detalles
+                                </button>
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="cambiarEstado('${cot.id}')">
+                                        <i class="bi bi-pencil"></i> Estado
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" onclick="duplicarCotizacion('${cot.id}')">
+                                        <i class="bi bi-files"></i> Duplicar
+                                    </button>
+                                </div>
+                                <div class="btn-group">
+                                    <a href="/descargar-pdf/${cot.id}" target="_blank" class="btn btn-sm btn-danger">
+                                        <i class="bi bi-file-pdf"></i> PDF
+                                    </a>
+                                    <a href="/descargar-excel/${cot.id}" class="btn btn-sm btn-success">
+                                        <i class="bi bi-file-excel"></i> Excel
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function aplicarFiltros() {
+            let filtradas = [...todasLasCotizaciones];
+
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            if (searchTerm) {
+                filtradas = filtradas.filter(cot => 
+                    cot.cliente.toLowerCase().includes(searchTerm) || 
+                    String(cot.quote_number).padStart(3, '0').includes(searchTerm)
+                );
+            }
+
+            const fechaDesde = document.getElementById('fecha-desde').value;
+            const fechaHasta = document.getElementById('fecha-hasta').value;
+            if (fechaDesde) filtradas = filtradas.filter(cot => cot.fecha >= fechaDesde);
+            if (fechaHasta) filtradas = filtradas.filter(cot => cot.fecha <= fechaHasta);
+
+            const estadoFiltro = document.getElementById('filter-estado').value;
+            if (estadoFiltro) filtradas = filtradas.filter(cot => cot.estado === estadoFiltro);
+
+            const sortBy = document.getElementById('sort-select').value;
+            switch(sortBy) {
+                case 'reciente':
+                    filtradas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+                    break;
+                case 'antigua':
+                    filtradas.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+                    break;
+                case 'mayor':
+                    filtradas.sort((a, b) => {
+                        const valorA = parseFloat(a.total.replace('$', '').replace(',', ''));
+                        const valorB = parseFloat(b.total.replace('$', '').replace(',', ''));
+                        return valorB - valorA;
+                    });
+                    break;
+                case 'menor':
+                    filtradas.sort((a, b) => {
+                        const valorA = parseFloat(a.total.replace('$', '').replace(',', ''));
+                        const valorB = parseFloat(b.total.replace('$', '').replace(',', ''));
+                        return valorA - valorB;
+                    });
+                    break;
+            }
+
+            cotizacionesFiltradas = filtradas;
+            renderCotizaciones(filtradas);
+        }
+
+        document.getElementById('search-input').addEventListener('input', aplicarFiltros);
+        document.getElementById('fecha-desde').addEventListener('change', aplicarFiltros);
+        document.getElementById('fecha-hasta').addEventListener('change', aplicarFiltros);
+        document.getElementById('filter-estado').addEventListener('change', aplicarFiltros);
+        document.getElementById('sort-select').addEventListener('change', aplicarFiltros);
+
+        document.getElementById('reset-filters').addEventListener('click', function() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('fecha-desde').value = '';
+            document.getElementById('fecha-hasta').value = '';
+            document.getElementById('filter-estado').value = '';
+            document.getElementById('sort-select').value = 'reciente';
+            aplicarFiltros();
+        });
+
+        fetch('/api/cotizaciones')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    todasLasCotizaciones = data.cotizaciones;
+                    cotizacionesFiltradas = [...todasLasCotizaciones];
+                    calcularEstadisticas(todasLasCotizaciones);
+                    aplicarFiltros();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('loading').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle"></i> 
+                        Error al cargar las cotizaciones
+                    </div>
+                `;
+            });
+    </script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes - BlueSky Energy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --bluesky-dark-blue: #0d2a42;
+            --bluesky-light-blue: #2cb0e8;
+        }
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar-brand img {
+            max-height: 40px;
+        }
+        .bg-primary { background-color: var(--bluesky-dark-blue) !important; }
+        .btn-primary { background-color: var(--bluesky-dark-blue); border-color: var(--bluesky-dark-blue); }
+        .btn-primary:hover { background-color: #0a2033; border-color: #0a2033; }
+        .text-primary { color: var(--bluesky-dark-blue) !important; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="BlueSky Energy Logo" class="me-2">
+                <span class="fs-5">BlueSky Energy</span>
+            </a>
+            <div class="d-flex gap-2">
+                <a href="/dashboard" class="btn btn-outline-light">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="/cotizaciones" class="btn btn-outline-light">
+                    <i class="bi bi-list-ul"></i> Cotizaciones
+                </a>
+                <a href="/clientes" class="btn btn-light">
+                    <i class="bi bi-people"></i> Clientes
+                </a>
+                <a href="/" class="btn btn-outline-light">
+                    <i class="bi bi-plus-circle"></i> Nueva
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4 mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-people"></i> Gestión de Clientes</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoClienteModal">
+                <i class="bi bi-plus-circle"></i> Nuevo Cliente
+            </button>
+        </div>
+
+        <div class="card shadow-lg">
+            <div class="card-body">
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="search-clientes" placeholder="Buscar cliente...">
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Empresa</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Cotizaciones</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clientes-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL NUEVO CLIENTE -->
+    <div class="modal fade" id="nuevoClienteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Nuevo Cliente</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-nuevo-cliente">
+                        <div class="mb-3">
+                            <label class="form-label">Nombre *</label>
+                            <input type="text" class="form-control" name="nombre" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Empresa</label>
+                            <input type="text" class="form-control" name="empresa">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" name="email">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" name="telefono">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btn-guardar-cliente">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let todosLosClientes = [];
+
+        function cargarClientes() {
+            fetch('/api/clientes')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        todosLosClientes = data.clientes;
+                        renderClientes(todosLosClientes);
+                    }
+                });
+        }
+
+        function renderClientes(clientes) {
+            const tbody = document.getElementById('clientes-tbody');
+            tbody.innerHTML = '';
+
+            if (clientes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No hay clientes registrados</td></tr>';
+                return;
+            }
+
+            clientes.forEach(cliente => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${cliente.nombre}</strong></td>
+                    <td>${cliente.empresa || '-'}</td>
+                    <td>${cliente.email || '-'}</td>
+                    <td>${cliente.telefono || '-'}</td>
+                    <td><span class="badge bg-primary">${cliente.total_cotizaciones}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="verHistorial('${cliente.nombre}')">
+                            <i class="bi bi-clock-history"></i> Historial
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function verHistorial(nombreCliente) {
+            window.location.href = `/cotizaciones?cliente=${encodeURIComponent(nombreCliente)}`;
+        }
+
+        document.getElementById('search-clientes').addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase();
+            const filtrados = todosLosClientes.filter(c => 
+                c.nombre.toLowerCase().includes(term) || 
+                (c.empresa && c.empresa.toLowerCase().includes(term))
+            );
+            renderClientes(filtrados);
+        });
+
+        document.getElementById('btn-guardar-cliente').addEventListener('click', function() {
+            const form = document.getElementById('form-nuevo-cliente');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+
+            fetch('/api/clientes', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.status === 'ok') {
+                    alert('Cliente creado exitosamente');
+                    bootstrap.Modal.getInstance(document.getElementById('nuevoClienteModal')).hide();
+                    form.reset();
+                    cargarClientes();
+                }
+            });
+        });
+
+        cargarClientes();
+    </script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - BlueSky Energy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bluesky-dark-blue: #0d2a42;
+            --bluesky-light-blue: #2cb0e8;
+        }
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar-brand img {
+            max-height: 40px;
+        }
+        .bg-primary { background-color: var(--bluesky-dark-blue) !important; }
+        .btn-primary { background-color: var(--bluesky-dark-blue); border-color: var(--bluesky-dark-blue); }
+        .btn-primary:hover { background-color: #0a2033; border-color: #0a2033; }
+        .text-primary { color: var(--bluesky-dark-blue) !important; }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--bluesky-light-blue);
+        }
+        .stat-card.success { border-left-color: #28a745; }
+        .stat-card.danger { border-left-color: #dc3545; }
+        .stat-card.warning { border-left-color: #ffc107; }
+        .stat-card h2 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0;
+            color: var(--bluesky-dark-blue);
+        }
+        .stat-card p {
+            margin: 0;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        .stat-card .icon {
+            font-size: 3rem;
+            opacity: 0.2;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="BlueSky Energy Logo" class="me-2">
+                <span class="fs-5">BlueSky Energy</span>
+            </a>
+            <div class="d-flex gap-2">
+                <a href="/dashboard" class="btn btn-light">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="/cotizaciones" class="btn btn-outline-light">
+                    <i class="bi bi-list-ul"></i> Cotizaciones
+                </a>
+                <a href="/clientes" class="btn btn-outline-light">
+                    <i class="bi bi-people"></i> Clientes
+                </a>
+                <a href="/" class="btn btn-outline-light">
+                    <i class="bi bi-plus-circle"></i> Nueva
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4 mb-5">
+        <h2 class="mb-4"><i class="bi bi-speedometer2"></i> Dashboard de Ventas</h2>
+
+        <!-- ESTADÍSTICAS PRINCIPALES -->
+        <div class="row g-4 mb-4" id="stats-container">
+            <div class="col-md-3">
+                <div class="stat-card position-relative">
+                    <i class="bi bi-file-text icon"></i>
+                    <h2 id="stat-total">0</h2>
+                    <p>Total Cotizaciones</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card success position-relative">
+                    <i class="bi bi-currency-dollar icon"></i>
+                    <h2 id="stat-monto">$0</h2>
+                    <p>Monto Total</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card warning position-relative">
+                    <i class="bi bi-graph-up icon"></i>
+                    <h2 id="stat-promedio">$0</h2>
+                    <p>Promedio</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card danger position-relative">
+                    <i class="bi bi-check-circle icon"></i>
+                    <h2 id="stat-aprobadas">0</h2>
+                    <p>Aprobadas</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- GRÁFICOS -->
+        <div class="row">
+            <div class="col-md-8">
+                <div class="chart-container">
+                    <h5 class="mb-3">Cotizaciones por Mes</h5>
+                    <canvas id="chartPorMes"></canvas>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="chart-container">
+                    <h5 class="mb-3">Estado de Cotizaciones</h5>
+                    <canvas id="chartPorEstado"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- ÚLTIMAS COTIZACIONES -->
+        <div class="chart-container">
+            <h5 class="mb-3">Últimas Cotizaciones</h5>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nº</th>
+                            <th>Cliente</th>
+                            <th>Fecha</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ultimas-cotizaciones"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value);
+        }
+
+        function getEstadoBadge(estado) {
+            const badges = {
+                'Pendiente': 'bg-warning',
+                'Aprobada': 'bg-success',
+                'Rechazada': 'bg-danger',
+                'En Revisión': 'bg-info'
+            };
+            return `<span class="badge ${badges[estado] || 'bg-secondary'}">${estado}</span>`;
+        }
+
+        // Cargar estadísticas
+        fetch('/api/estadisticas')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    document.getElementById('stat-total').textContent = data.total_cotizaciones;
+                    document.getElementById('stat-monto').textContent = formatCurrency(data.monto_total);
+                    document.getElementById('stat-promedio').textContent = formatCurrency(data.promedio);
+                    document.getElementById('stat-aprobadas').textContent = data.por_estado.Aprobada || 0;
+
+                    // Gráfico por mes
+                    const ctxMes = document.getElementById('chartPorMes').getContext('2d');
+                    new Chart(ctxMes, {
+                        type: 'line',
+                        data: {
+                            labels: Object.keys(data.por_mes),
+                            datasets: [{
+                                label: 'Cotizaciones',
+                                data: Object.values(data.por_mes),
+                                borderColor: '#2cb0e8',
+                                backgroundColor: 'rgba(44, 176, 232, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    });
+
+                    // Gráfico por estado
+                    const ctxEstado = document.getElementById('chartPorEstado').getContext('2d');
+                    new Chart(ctxEstado, {
+                        type: 'doughnut',
+                        data: {
+                            labels: Object.keys(data.por_estado),
+                            datasets: [{
+                                data: Object.values(data.por_estado),
+                                backgroundColor: ['#ffc107', '#28a745', '#dc3545', '#17a2b8']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { position: 'bottom' }
+                            }
+                        }
+                    });
+                }
+            });
+
+        // Cargar últimas cotizaciones
+        fetch('/api/cotizaciones')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    const tbody = document.getElementById('ultimas-cotizaciones');
+                    data.cotizaciones.slice(0, 5).forEach(cot => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td><strong>#${String(cot.quote_number).padStart(3, '0')}</strong></td>
+                            <td>${cot.cliente}</td>
+                            <td>${cot.fecha}</td>
+                            <td><strong>${cot.total}</strong></td>
+                            <td>${getEstadoBadge(cot.estado)}</td>
+                            <td>
+                                <a href="/descargar-pdf/${cot.id}" target="_blank" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-file-pdf"></i>
+                                </a>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
+            });
+    </script>
+</body>
+</html>
