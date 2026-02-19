@@ -4,36 +4,39 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BlueSky Energy — Clientes</title>
-<link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo 1.2.png') }}">
-
+<link rel="icon" type="image/jpg" href="{{ url_for('static', filename='img/logo.jpg') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-
 <style>
 :root {
   --bg:    #07090f;
   --card:  #0e1520;
+  --input: #0a1221;
   --bdr:   rgba(255,255,255,0.07);
-  --bdr2:  rgba(255,255,255,0.03);
+  --bdr2:  rgba(255,255,255,0.04);
   --text:  #f0f4ff;
   --sub:   #7a8899;
   --dim:   #33404f;
   --blue:  #4f9eff;
+  --green: #00e5a0;
+  --amber: #f5a623;
+  --red:   #ff4d6a;
 }
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--text);
-  font-family: 'Outfit', sans-serif; font-size: 18px;
+  font-family: 'Outfit', sans-serif; font-size: 16px; line-height: 1.5;
   overflow-x: hidden; min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
 #bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.78; }
 .shell { position: relative; z-index: 2; display: flex; min-height: 100vh; }
 
-/* SIDEBAR */
+/* ── SIDEBAR ── */
 .sidebar {
   width: 72px; position: fixed; left: 0; top: 0; bottom: 0;
   background: rgba(8,11,18,0.95); backdrop-filter: blur(28px);
@@ -44,22 +47,266 @@ body {
 }
 .sidebar:hover { width: 240px; }
 .sb-logo { width: 100%; display: flex; align-items: center; gap: 14px; padding: 0 20px; margin-bottom: 40px; overflow: hidden; }
-.sb-name { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 0.14em; color: var(--text); white-space: nowrap; opacity: 0; transition: 0.2s; }
+.sb-mark { width: 36px; height: 36px; flex-shrink: 0; border-radius: 9px; background: var(--blue); display: grid; place-items: center; }
+.sb-mark svg { width: 17px; height: 17px; fill: none; stroke: #fff; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.sb-name { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 0.14em; color: var(--text); white-space: nowrap; opacity: 0; transition: opacity 0.2s 0.08s; }
 .sidebar:hover .sb-name { opacity: 1; }
-
+.nav-group { width: 100%; display: flex; flex-direction: column; gap: 2px; }
 .nav-link {
-  width: 100%; display: flex; align-items: center; gap: 16px; padding: 18px 24px;
-  text-decoration: none; color: var(--sub); font-size: 17px; font-weight: 500;
-  transition: all 0.15s; white-space: nowrap; overflow: hidden;
-  border-left: 2px solid transparent;
+  width: 100%; display: flex; align-items: center; gap: 16px; padding: 14px 20px;
+  text-decoration: none; color: var(--sub); font-size: 15px; font-weight: 400;
+  transition: all 0.15s; white-space: nowrap; overflow: hidden; border-left: 2px solid transparent;
 }
 .nav-link.active { color: var(--text); border-left-color: var(--blue); background: rgba(79,158,255,0.08); }
-.nav-ico { width: 28px; flex-shrink: 0; display: grid; place-items: center; }
-.nav-ico svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; }
-.nav-txt { opacity: 0; transition: opacity 0.2s; }
+.nav-link:hover:not(.active) { color: var(--text); background: rgba(255,255,255,0.04); }
+.nav-ico { width: 24px; flex-shrink: 0; display: grid; place-items: center; }
+.nav-ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.nav-txt { opacity: 0; transition: opacity 0.2s 0.08s; }
 .sidebar:hover .nav-txt { opacity: 1; }
+.sb-gap { flex: 1; }
 
-/* MOBILE NAV */
+/* ── MAIN ── */
+.main { margin-left: 72px; flex: 1; padding: 0 52px 120px; }
+
+/* ── TOPBAR ── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 40px 0 48px;
+  position: sticky; top: 0;
+  background: linear-gradient(to bottom, var(--bg) 70%, transparent);
+  z-index: 50;
+}
+.tb-section { font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 0.26em; color: var(--dim); margin-bottom: 6px; }
+.tb-title { font-size: 26px; font-weight: 600; color: var(--text); letter-spacing: -0.02em; }
+.tb-right { display: flex; align-items: center; gap: 14px; }
+
+.btn-nuevo {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--blue); border: none; border-radius: 12px;
+  padding: 14px 24px; color: #fff;
+  font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 0.16em;
+  cursor: pointer; transition: opacity 0.15s, transform 0.15s;
+  position: relative; overflow: hidden;
+}
+.btn-nuevo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.14), transparent); }
+.btn-nuevo:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-nuevo svg { width: 17px; height: 17px; fill: none; stroke: #fff; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; position: relative; z-index: 1; }
+.btn-nuevo span { position: relative; z-index: 1; }
+
+.ava { width: 40px; height: 40px; border-radius: 50%; background: var(--blue); display: grid; place-items: center; font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 0.08em; color: #fff; cursor: pointer; border: 1px solid rgba(79,158,255,0.35); }
+
+/* ── SLABEL ── */
+.slabel { font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 0.28em; color: var(--dim); margin-bottom: 20px; }
+
+/* ── SEARCH BAR ── */
+.search-wrap {
+  position: relative; margin-bottom: 24px;
+}
+.search-ico {
+  position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+  width: 18px; height: 18px; color: var(--dim); pointer-events: none;
+}
+.search-ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.search-input {
+  width: 100%; background: var(--card); border: 1px solid var(--bdr);
+  border-radius: 14px; padding: 16px 18px 16px 50px;
+  color: var(--text); font-family: 'Outfit', sans-serif; font-size: 15px;
+  outline: none; transition: border-color 0.18s, box-shadow 0.18s;
+}
+.search-input::placeholder { color: var(--dim); }
+.search-input:focus { border-color: rgba(79,158,255,0.4); box-shadow: 0 0 0 3px rgba(79,158,255,0.07); }
+
+/* ── STATS ROW ── */
+.stats-row {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 16px; margin-bottom: 28px;
+}
+.stat-card {
+  background: var(--card); border: 1px solid var(--bdr);
+  border-radius: 16px; padding: 24px 28px;
+  display: flex; align-items: center; gap: 18px;
+}
+.stat-ico { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0; }
+.stat-ico svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 0.02em; line-height: 1; color: var(--text); }
+.stat-lbl { font-size: 13px; color: var(--sub); margin-top: 3px; }
+
+/* ── TABLE PANEL ── */
+.panel {
+  background: var(--card); border: 1px solid var(--bdr);
+  border-radius: 20px; overflow: hidden;
+}
+
+/* Table header */
+.table-head {
+  display: grid;
+  grid-template-columns: 2fr 2fr 80px 80px 60px;
+  gap: 16px; padding: 18px 32px;
+  border-bottom: 1px solid var(--bdr);
+}
+.table-head span {
+  font-family: 'Bebas Neue', sans-serif; font-size: 12px;
+  letter-spacing: 0.22em; color: var(--dim);
+}
+
+/* Client rows */
+.client-row {
+  display: grid;
+  grid-template-columns: 2fr 2fr 80px 80px 60px;
+  gap: 16px; padding: 20px 32px;
+  border-bottom: 1px solid var(--bdr2);
+  align-items: center;
+  transition: background 0.12s;
+  animation: rowIn 0.3s ease;
+}
+@keyframes rowIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+.client-row:last-child { border-bottom: none; }
+.client-row:hover { background: rgba(255,255,255,0.02); }
+
+.cl-name { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.cl-email { font-size: 13px; color: var(--sub); }
+.cl-empresa { font-size: 15px; color: var(--sub); }
+.cl-docs {
+  font-family: 'Bebas Neue', sans-serif; font-size: 22px;
+  letter-spacing: 0.04em; color: var(--blue);
+}
+.cl-date { font-size: 13px; color: var(--dim); }
+
+.btn-ver {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: rgba(79,158,255,0.08); border: 1px solid rgba(79,158,255,0.15);
+  color: var(--blue); cursor: pointer; display: grid; place-items: center;
+  transition: background 0.15s, transform 0.15s;
+}
+.btn-ver:hover { background: rgba(79,158,255,0.18); transform: scale(1.06); }
+.btn-ver svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+.empty-state {
+  padding: 72px 32px; text-align: center;
+}
+.empty-ico { width: 56px; height: 56px; border-radius: 16px; background: rgba(79,158,255,0.07); display: grid; place-items: center; margin: 0 auto 18px; }
+.empty-ico svg { width: 26px; height: 26px; fill: none; stroke: var(--blue); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.empty-title { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+.empty-sub { font-size: 14px; color: var(--sub); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(6px); z-index: 500;
+  display: none; place-items: center; padding: 20px;
+}
+.modal-overlay.open { display: grid; }
+.modal {
+  background: var(--card); border: 1px solid var(--bdr);
+  border-radius: 20px; padding: 40px;
+  width: 100%; max-width: 520px;
+  animation: mIn 0.28s cubic-bezier(.22,1,.36,1);
+}
+@keyframes mIn { from { opacity:0; transform:scale(0.96) translateY(12px); } to { opacity:1; transform:none; } }
+.modal-head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding-bottom: 24px; border-bottom: 1px solid var(--bdr2); margin-bottom: 30px;
+}
+.modal-title { font-size: 18px; font-weight: 600; color: var(--text); }
+.modal-sub { font-size: 14px; color: var(--sub); margin-top: 4px; }
+.btn-close {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: rgba(255,255,255,0.05); border: 1px solid var(--bdr);
+  color: var(--sub); cursor: pointer; display: grid; place-items: center; flex-shrink: 0;
+  transition: background 0.15s;
+}
+.btn-close:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+.btn-close svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.form-stack { display: flex; flex-direction: column; gap: 20px; }
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field-label { font-family: 'Bebas Neue', sans-serif; font-size: 12px; letter-spacing: 0.22em; color: var(--dim); }
+.field input {
+  background: var(--input); border: 1px solid var(--bdr);
+  border-radius: 12px; padding: 14px 18px;
+  color: var(--text); font-family: 'Outfit', sans-serif; font-size: 15px;
+  outline: none; transition: border-color 0.18s, box-shadow 0.18s; width: 100%;
+}
+.field input::placeholder { color: var(--dim); }
+.field input:focus { border-color: rgba(79,158,255,0.45); box-shadow: 0 0 0 3px rgba(79,158,255,0.08); }
+
+.btn-guardar {
+  width: 100%; padding: 17px;
+  background: var(--blue); border: none; border-radius: 14px;
+  color: #fff; font-family: 'Bebas Neue', sans-serif;
+  font-size: 15px; letter-spacing: 0.18em;
+  cursor: pointer; margin-top: 8px;
+  transition: opacity 0.15s; position: relative; overflow: hidden;
+}
+.btn-guardar::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent); }
+.btn-guardar:hover { opacity: 0.9; }
+
+/* ── MODAL DETALLE CLIENTE ── */
+.modal-lg {
+  background: var(--card); border: 1px solid var(--bdr);
+  border-radius: 20px; padding: 40px;
+  width: 100%; max-width: 760px; max-height: 88vh;
+  overflow-y: auto;
+  animation: mIn 0.28s cubic-bezier(.22,1,.36,1);
+}
+.cl-detail-header {
+  display: flex; align-items: center; gap: 20px; margin-bottom: 32px;
+}
+.cl-avatar {
+  width: 60px; height: 60px; border-radius: 16px;
+  background: rgba(79,158,255,0.12); border: 1px solid rgba(79,158,255,0.2);
+  display: grid; place-items: center; flex-shrink: 0;
+  font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.06em; color: var(--blue);
+}
+.cl-detail-name { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.cl-detail-sub { font-size: 14px; color: var(--sub); }
+.detail-section-label { font-family: 'Bebas Neue', sans-serif; font-size: 11px; letter-spacing: 0.24em; color: var(--dim); margin-bottom: 14px; }
+.cot-mini-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0; border-bottom: 1px solid var(--bdr2); gap: 12px;
+}
+.cot-mini-row:last-child { border-bottom: none; }
+.cot-num { font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 0.08em; color: var(--dim); }
+.cot-cliente { font-size: 14px; font-weight: 500; color: var(--text); }
+.cot-total { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--text); }
+.cot-badge {
+  font-size: 12px; font-weight: 500; padding: 4px 11px; border-radius: 5px;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.cb-g { background: rgba(0,229,160,0.08); color: var(--green); }
+.cb-a { background: rgba(245,166,35,0.08); color: var(--amber); }
+.cb-b { background: rgba(79,158,255,0.08); color: var(--blue); }
+.cb-r { background: rgba(255,77,106,0.08); color: var(--red); }
+.badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 32px; right: 32px; z-index: 999;
+  padding: 16px 24px; border-radius: 14px;
+  background: var(--card); border: 1px solid var(--bdr);
+  font-size: 15px; font-weight: 500; color: var(--text);
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  transform: translateY(16px); opacity: 0;
+  transition: all 0.3s cubic-bezier(.22,1,.36,1);
+  pointer-events: none;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.toast.ok .toast-dot { background: var(--green); }
+.toast.err .toast-dot { background: var(--red); }
+
+/* ── LOADER ── */
+.loader {
+  position: fixed; inset: 0; background: var(--bg); z-index: 9999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+}
+.loader-name { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.32em; color: var(--sub); }
+.loader-bar { width: 130px; height: 1px; background: var(--bdr); overflow: hidden; }
+.loader-fill { height: 100%; background: var(--blue); width: 0; animation: lp 1.4s ease forwards; }
+@keyframes lp { to { width: 100%; } }
+
+/* ── MOBILE NAV ── */
 .mobile-nav {
   display: none; position: fixed; bottom: 0; left: 0; right: 0;
   height: 68px; z-index: 200;
@@ -69,146 +316,416 @@ body {
 }
 .mnav-btn {
   display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1;
-  text-decoration: none; color: #7a8899; font-size: 11px; font-weight: 500; text-transform: uppercase;
+  text-decoration: none; color: var(--dim);
+  font-size: 11px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase;
+  padding: 8px 4px; transition: color 0.15s;
 }
 .mnav-btn.active { color: var(--blue); }
-.mnav-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; }
+.mnav-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 
-/* MAIN */
-.main { margin-left: 72px; flex: 1; padding: 0 52px 120px; max-width: 1500px; }
-.topbar { display: flex; align-items: center; justify-content: space-between; padding: 40px 0 48px; }
-.tb-section { font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 0.26em; color: var(--dim); margin-bottom: 6px; }
-.tb-title { font-size: 26px; font-weight: 600; color: var(--text); }
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 2px; }
 
-.panel { background: var(--card); border: 1px solid var(--bdr); border-radius: 20px; padding: 36px; }
-.search-box {
-  background: rgba(255,255,255,0.03); border: 1px solid var(--bdr); border-radius: 12px;
-  padding: 14px 20px; color: white; width: 100%; outline: none; margin-bottom: 30px;
+/* ── RESPONSIVE ── */
+@media (max-width: 1000px) {
+  .stats-row { grid-template-columns: repeat(3,1fr); }
+  .table-head { grid-template-columns: 2fr 2fr 70px 60px; }
+  .client-row { grid-template-columns: 2fr 2fr 70px 60px; }
+  .table-head span:nth-child(4),
+  .client-row .cl-date { display: none; }
 }
-
-table { width: 100%; border-collapse: collapse; }
-thead th { font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 0.18em; color: var(--dim); text-align: left; padding: 0 0 18px; border-bottom: 1px solid var(--bdr); }
-tbody td { padding: 18px 0; font-size: 15px; border-bottom: 1px solid var(--bdr2); }
-
-.btn-blue {
-  background: var(--blue); color: white; border: none; padding: 12px 24px; border-radius: 10px;
-  font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.1em; cursor: pointer;
-}
-
-/* RESPONSIVE */
 @media (max-width: 768px) {
   .sidebar { display: none; }
   .mobile-nav { display: flex; }
-  .main { margin-left: 0; padding: 20px 15px 100px; }
-  .topbar { flex-direction: column; align-items: flex-start; gap: 20px; padding: 30px 0; }
-  .panel { padding: 20px; }
-  .btn-blue { width: 100%; }
-  .table-responsive { overflow-x: auto; display: block; width: 100%; }
+  .main { margin-left: 0; padding: 0 18px 80px; }
+  .topbar { padding: 24px 0 28px; }
+  .tb-title { font-size: 22px; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .stats-row .stat-card:last-child { grid-column: 1 / -1; }
+  .table-head { grid-template-columns: 1fr 100px 44px; padding: 14px 20px; }
+  .table-head span:nth-child(2),
+  .table-head span:nth-child(4) { display: none; }
+  .client-row { grid-template-columns: 1fr 100px 44px; padding: 16px 20px; }
+  .cl-empresa, .cl-date { display: none; }
+  .modal { padding: 28px 24px; }
+  .modal-lg { padding: 24px 20px; }
+}
+@media (max-width: 480px) {
+  .main { padding: 0 14px 80px; }
+  .stats-row { grid-template-columns: 1fr; }
+  .stats-row .stat-card:last-child { grid-column: auto; }
+  .btn-nuevo span { display: none; }
+  .btn-nuevo { padding: 12px 16px; }
+  .tb-title { font-size: 20px; }
 }
 </style>
 </head>
 <body>
 
-<canvas id="bg-canvas"></canvas>
+<div class="loader" id="loader">
+  <div class="loader-name">BlueSky Energy</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+</div>
 
 <div class="shell">
+  <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sb-logo">
-      <img src="{{ url_for('static', filename='img/logo 1.2.png') }}" alt="Logo" style="height: 32px;">
+      <div class="sb-mark">
+        <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
       <span class="sb-name">BlueSky Energy</span>
     </div>
     <nav class="nav-group">
       <a href="/dashboard" class="nav-link">
-        <span class="nav-ico"><svg viewBox="0 0 24 24" style="width:20px; stroke:currentColor; stroke-width:1.8; fill:none;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
         <span class="nav-txt">Dashboard</span>
       </a>
       <a href="/" class="nav-link">
-        <span class="nav-ico"><svg viewBox="0 0 24 24" style="width:20px; stroke:currentColor; stroke-width:1.8; fill:none;"><path d="M12 5v14M5 12h14"/></svg></span>
-        <span class="nav-txt">Nueva</span>
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+        <span class="nav-txt">Nueva Cotización</span>
       </a>
       <a href="/cotizaciones" class="nav-link">
-        <span class="nav-ico"><svg viewBox="0 0 24 24" style="width:20px; stroke:currentColor; stroke-width:1.8; fill:none;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
         <span class="nav-txt">Cotizaciones</span>
       </a>
       <a href="/clientes" class="nav-link active">
-        <span class="nav-ico"><svg viewBox="0 0 24 24" style="width:20px; stroke:currentColor; stroke-width:1.8; fill:none;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
         <span class="nav-txt">Clientes</span>
       </a>
     </nav>
+    <div class="sb-gap"></div>
   </aside>
 
-  <nav class="mobile-nav">
-    <a href="/dashboard" class="mnav-btn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Panel</span></a>
-    <a href="/" class="mnav-btn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Nueva</span></a>
-    <a href="/cotizaciones" class="mnav-btn"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg><span>Listado</span></a>
-    <a href="/clientes" class="mnav-btn active"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>Clientes</span></a>
-  </nav>
-
   <main class="main">
+    <!-- TOPBAR -->
     <div class="topbar">
       <div>
-        <div class="tb-section">Sistema / Directorio</div>
+        <div class="tb-section">Sistema de Gestión / Directorio</div>
         <div class="tb-title">Clientes Registrados</div>
       </div>
-      <button class="btn-blue" onclick="document.getElementById('modal').style.display='grid'">+ NUEVO CLIENTE</button>
+      <div class="tb-right">
+        <button class="btn-nuevo" id="btn-nuevo">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          <span>Nuevo Cliente</span>
+        </button>
+        <div class="ava">BE</div>
+      </div>
     </div>
 
-    <div class="panel">
-      <input type="text" class="search-box" id="search-clientes" placeholder="Buscar cliente...">
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th>Cliente</th>
-              <th>Empresa</th>
-              <th style="text-align:center">Docs</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="clientes-tbody"></tbody>
-        </table>
+    <!-- STATS -->
+    <div class="stats-row" id="stats-row">
+      <div class="stat-card">
+        <div class="stat-ico" style="background:rgba(79,158,255,0.1);color:var(--blue)">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        </div>
+        <div>
+          <div class="stat-val" id="s-total">—</div>
+          <div class="stat-lbl">Total de clientes</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-ico" style="background:rgba(0,229,160,0.1);color:var(--green)">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div>
+          <div class="stat-val" id="s-cots">—</div>
+          <div class="stat-lbl">Cotizaciones totales</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-ico" style="background:rgba(245,166,35,0.1);color:var(--amber)">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <div>
+          <div class="stat-val" id="s-avg">—</div>
+          <div class="stat-lbl">Promedio por cliente</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="search-wrap">
+      <div class="search-ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+      <input type="text" class="search-input" id="search" placeholder="Buscar por nombre, empresa o correo…">
+    </div>
+
+    <!-- TABLE -->
+    <div class="slabel">Directorio de clientes</div>
+    <div class="panel" id="panel-clientes">
+      <div class="table-head">
+        <span>Cliente</span>
+        <span>Empresa</span>
+        <span>Docs</span>
+        <span>Registro</span>
+        <span></span>
+      </div>
+      <div id="clientes-list">
+        <div class="empty-state">
+          <div class="empty-ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+          <div class="empty-title">Cargando clientes…</div>
+          <div class="empty-sub">Un momento por favor</div>
+        </div>
       </div>
     </div>
   </main>
 </div>
 
-<script>
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), alpha: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-const group = new THREE.Group(); scene.add(group);
-const count = 60; const pos = new Float32Array(count*3);
-for(let i=0; i<count*3; i++) pos[i] = (Math.random()-0.5)*10;
-const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-group.add(new THREE.Points(geo, new THREE.PointsMaterial({size: 0.08, color: '#4f9eff'})));
-camera.position.z = 5;
-function anim() { requestAnimationFrame(anim); group.rotation.y += 0.001; renderer.render(scene, camera); } anim();
+<!-- MOBILE NAV -->
+<nav class="mobile-nav">
+  <a href="/dashboard" class="mnav-btn">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Panel
+  </a>
+  <a href="/" class="mnav-btn">
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nueva
+  </a>
+  <a href="/cotizaciones" class="mnav-btn">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Cotizaciones
+  </a>
+  <a href="/clientes" class="mnav-btn active">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Clientes
+  </a>
+</nav>
 
-let todosLosClientes = [];
-function cargarClientes() {
-  fetch('/api/clientes').then(r => r.json()).then(data => {
-    if (data.status === 'ok') { todosLosClientes = data.clientes; renderClientes(todosLosClientes); }
+<!-- MODAL NUEVO CLIENTE -->
+<div class="modal-overlay" id="modal-nuevo">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Nuevo Cliente</div>
+        <div class="modal-sub">Completa la información del contacto</div>
+      </div>
+      <button class="btn-close" id="close-nuevo">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="form-stack">
+      <div class="field">
+        <label class="field-label">Nombre completo *</label>
+        <input type="text" id="c-nombre" placeholder="Juan Pérez">
+      </div>
+      <div class="field">
+        <label class="field-label">Empresa</label>
+        <input type="text" id="c-empresa" placeholder="Empresa S.A.">
+      </div>
+      <div class="field">
+        <label class="field-label">Correo electrónico</label>
+        <input type="email" id="c-email" placeholder="correo@empresa.com">
+      </div>
+      <div class="field">
+        <label class="field-label">Teléfono</label>
+        <input type="tel" id="c-tel" placeholder="+1 809 000 0000">
+      </div>
+      <button class="btn-guardar" id="btn-guardar-cliente">Guardar Cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETALLE CLIENTE -->
+<div class="modal-overlay" id="modal-detalle">
+  <div class="modal-lg">
+    <div class="modal-head">
+      <div id="detalle-header-info">
+        <div class="modal-title" id="detalle-nombre">—</div>
+        <div class="modal-sub" id="detalle-sub">—</div>
+      </div>
+      <button class="btn-close" id="close-detalle">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="detail-section-label">Cotizaciones del cliente</div>
+    <div id="detalle-cots">
+      <div style="color:var(--dim);font-size:14px;padding:20px 0">Cargando…</div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><div class="toast-dot"></div><span id="toast-msg"></span></div>
+
+<canvas id="bg-canvas"></canvas>
+
+<script>
+// ── THREE.JS ──
+(function(){
+  const c=document.getElementById('bg-canvas');
+  const r=new THREE.WebGLRenderer({canvas:c,alpha:true,antialias:true});
+  r.setPixelRatio(Math.min(devicePixelRatio,2));
+  r.setSize(innerWidth,innerHeight);
+  const scene=new THREE.Scene();
+  const cam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,0.1,100);
+  cam.position.z=5;
+  const N=1200,pos=new Float32Array(N*3),col=new Float32Array(N*3);
+  const pal=[new THREE.Color('#4f9eff'),new THREE.Color('#00e5a0'),new THREE.Color('#00d4ff'),new THREE.Color('#f5a623')];
+  for(let i=0;i<N;i++){
+    pos[i*3]=(Math.random()-.5)*24;pos[i*3+1]=(Math.random()-.5)*24;pos[i*3+2]=(Math.random()-.5)*10;
+    const cl=pal[Math.floor(Math.random()*4)];col[i*3]=cl.r;col[i*3+1]=cl.g;col[i*3+2]=cl.b;
+  }
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('color',new THREE.BufferAttribute(col,3));
+  const pts=new THREE.Points(geo,new THREE.PointsMaterial({size:0.055,vertexColors:true,transparent:true,opacity:0.85}));
+  scene.add(pts);
+  const lm=new THREE.LineBasicMaterial({color:0x0f1e35,transparent:true,opacity:0.45});
+  for(let i=-10;i<=10;i+=2){
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-14,i*.75,-2),new THREE.Vector3(14,i*.75,-2)]),lm));
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(i,-10,-2),new THREE.Vector3(i,10,-2)]),lm));
+  }
+  const mk=(g,m)=>new THREE.Mesh(g,m);
+  const r1=mk(new THREE.RingGeometry(2.5,2.52,80),new THREE.MeshBasicMaterial({color:0x4f9eff,side:THREE.DoubleSide,transparent:true,opacity:0.14}));
+  const r2=mk(new THREE.RingGeometry(4.0,4.02,80),new THREE.MeshBasicMaterial({color:0x00e5a0,side:THREE.DoubleSide,transparent:true,opacity:0.09}));
+  r1.rotation.x=Math.PI/3;r2.rotation.x=Math.PI/4;r2.rotation.y=Math.PI/6;
+  scene.add(r1);scene.add(r2);
+  let mx=0,my=0;
+  addEventListener('mousemove',e=>{mx=(e.clientX/innerWidth-.5)*.5;my=-(e.clientY/innerHeight-.5)*.5;});
+  addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();r.setSize(innerWidth,innerHeight);});
+  let t=0;
+  (function tick(){requestAnimationFrame(tick);t+=.003;pts.rotation.y=t*.06+mx*.8;pts.rotation.x=my*.4;r1.rotation.z=t*.2;r2.rotation.z=-t*.12;r1.rotation.y=t*.08;cam.position.x+=(mx*.6-cam.position.x)*.04;cam.position.y+=(my*.6-cam.position.y)*.04;r.render(scene,cam);})();
+})();
+
+// ── GSAP ──
+window.addEventListener('load',()=>{
+  gsap.to('#loader',{opacity:0,duration:.5,delay:1.2,onComplete:()=>document.getElementById('loader').style.display='none'});
+  gsap.from('.topbar',{y:-14,opacity:0,duration:.55,delay:1.35,ease:'power3.out'});
+  gsap.from('.stat-card',{y:20,opacity:0,duration:.5,stagger:.08,delay:1.5,ease:'power3.out'});
+  gsap.from('.search-wrap',{y:16,opacity:0,duration:.45,delay:1.7,ease:'power3.out'});
+  gsap.from('#panel-clientes',{y:22,opacity:0,duration:.55,delay:1.8,ease:'power3.out',onComplete:cargarClientes});
+});
+
+// ── TOAST ──
+function toast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.className='toast '+type;
+  document.getElementById('toast-msg').textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ── ESTADO BADGE ──
+const EST_CLS={'Aprobada':'cb-g','Pendiente':'cb-a','En Revisión':'cb-b','Rechazada':'cb-r'};
+function badge(e){ return `<span class="cot-badge ${EST_CLS[e]||'cb-a'}"><span class="badge-dot"></span>${e}</span>`; }
+
+// ── DATOS ──
+let todosClientes=[];
+
+async function cargarClientes(){
+  try{
+    const res=await fetch('/api/clientes').then(r=>r.json());
+    if(res.status!=='ok') return;
+    todosClientes=res.clientes||[];
+    renderClientes(todosClientes);
+
+    // Stats
+    const totalCots=todosClientes.reduce((a,c)=>a+(c.total_cotizaciones||0),0);
+    animN('s-total',todosClientes.length,n=>Math.round(n));
+    animN('s-cots',totalCots,n=>Math.round(n));
+    animN('s-avg',todosClientes.length>0?totalCots/todosClientes.length:0,n=>n.toFixed(1));
+  } catch(e){ console.error(e); }
+}
+
+function animN(id,end,fmt){
+  let o={v:0};
+  gsap.to(o,{v:end,duration:1.6,ease:'power2.out',onUpdate:()=>{ const el=document.getElementById(id); if(el) el.textContent=fmt(o.v); }});
+}
+
+function renderClientes(lista){
+  const cont=document.getElementById('clientes-list');
+  if(!lista.length){
+    cont.innerHTML=`
+      <div class="empty-state">
+        <div class="empty-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+        <div class="empty-title">Sin clientes registrados</div>
+        <div class="empty-sub">Agrega tu primer cliente usando el botón superior</div>
+      </div>`;
+    return;
+  }
+  cont.innerHTML='';
+  lista.forEach(c=>{
+    const row=document.createElement('div'); row.className='client-row';
+    const initials=(c.nombre||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const fecha=c.fecha_registro ? new Date(c.fecha_registro).toLocaleDateString('es',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+    row.innerHTML=`
+      <div>
+        <div class="cl-name">${c.nombre||'—'}</div>
+        <div class="cl-email">${c.email||c.correo||''}</div>
+      </div>
+      <div class="cl-empresa">${c.empresa||'—'}</div>
+      <div class="cl-docs">${c.total_cotizaciones||0}</div>
+      <div class="cl-date">${fecha}</div>
+      <button class="btn-ver" title="Ver detalle">
+        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>`;
+    row.querySelector('.btn-ver').addEventListener('click',()=>abrirDetalle(c));
+    cont.appendChild(row);
   });
 }
-function renderClientes(clientes) {
-  const tbody = document.getElementById('clientes-tbody');
-  tbody.innerHTML = '';
-  clientes.forEach(c => {
-    tbody.innerHTML += `<tr>
-      <td><b>${c.nombre}</b></td>
-      <td style="color:var(--sub)">${c.empresa || '-'}</td>
-      <td style="text-align:center; color:var(--blue); font-family:'Bebas Neue';">${c.total_cotizaciones}</td>
-      <td style="text-align:right"><button class="btn-blue" onclick="window.location.href='/cotizaciones?cliente=${encodeURIComponent(c.nombre)}'" style="padding:5px 12px">👁</button></td>
-    </tr>`;
-  });
+
+// Búsqueda
+document.getElementById('search').addEventListener('input',function(){
+  const q=this.value.toLowerCase();
+  renderClientes(todosClientes.filter(c=>
+    (c.nombre||'').toLowerCase().includes(q)||
+    (c.empresa||'').toLowerCase().includes(q)||
+    (c.email||c.correo||'').toLowerCase().includes(q)
+  ));
+});
+
+// ── MODAL NUEVO CLIENTE ──
+document.getElementById('btn-nuevo').addEventListener('click',()=>document.getElementById('modal-nuevo').classList.add('open'));
+document.getElementById('close-nuevo').addEventListener('click',()=>document.getElementById('modal-nuevo').classList.remove('open'));
+document.getElementById('modal-nuevo').addEventListener('click',e=>{ if(e.target===document.getElementById('modal-nuevo')) document.getElementById('modal-nuevo').classList.remove('open'); });
+
+document.getElementById('btn-guardar-cliente').addEventListener('click',async()=>{
+  const nombre=document.getElementById('c-nombre').value.trim();
+  if(!nombre){ toast('El nombre es obligatorio','err'); return; }
+  const data={
+    nombre,
+    empresa: document.getElementById('c-empresa').value.trim(),
+    email:   document.getElementById('c-email').value.trim(),
+    telefono:document.getElementById('c-tel').value.trim(),
+  };
+  try{
+    const res=await fetch('/api/clientes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).then(r=>r.json());
+    if(res.status==='ok'){
+      toast('Cliente registrado');
+      document.getElementById('modal-nuevo').classList.remove('open');
+      ['c-nombre','c-empresa','c-email','c-tel'].forEach(id=>document.getElementById(id).value='');
+      await cargarClientes();
+    } else { toast('Error al guardar','err'); }
+  } catch(e){ toast('Error de conexión','err'); }
+});
+
+// ── MODAL DETALLE ──
+document.getElementById('close-detalle').addEventListener('click',()=>document.getElementById('modal-detalle').classList.remove('open'));
+document.getElementById('modal-detalle').addEventListener('click',e=>{ if(e.target===document.getElementById('modal-detalle')) document.getElementById('modal-detalle').classList.remove('open'); });
+
+async function abrirDetalle(c){
+  document.getElementById('detalle-nombre').textContent=c.nombre||'—';
+  document.getElementById('detalle-sub').textContent=[c.empresa,c.email||c.correo].filter(Boolean).join(' · ')||'Sin información adicional';
+  document.getElementById('detalle-cots').innerHTML='<div style="color:var(--dim);font-size:14px;padding:16px 0">Cargando cotizaciones…</div>';
+  document.getElementById('modal-detalle').classList.add('open');
+
+  try{
+    const res=await fetch(`/api/cotizaciones?cliente=${encodeURIComponent(c.nombre)}`).then(r=>r.json());
+    const cots=(res.cotizaciones||[]).filter(q=>(q.cliente||'').toLowerCase()===c.nombre.toLowerCase());
+    const cont=document.getElementById('detalle-cots');
+    if(!cots.length){
+      cont.innerHTML='<div style="color:var(--dim);font-size:14px;padding:20px 0">Este cliente no tiene cotizaciones aún.</div>'; return;
+    }
+    cont.innerHTML='';
+    cots.forEach(q=>{
+      const num=String(q.quote_number||'—').padStart(3,'0');
+      const div=document.createElement('div'); div.className='cot-mini-row';
+      div.innerHTML=`
+        <span class="cot-num">#${num}</span>
+        <span class="cot-cliente" style="flex:1">${q.fecha||'—'}</span>
+        <span class="cot-total">${q.total||'$0'}</span>
+        ${badge(q.estado||'Pendiente')}`;
+      cont.appendChild(div);
+    });
+  } catch(e){ document.getElementById('detalle-cots').innerHTML='<div style="color:var(--red);font-size:14px">Error al cargar cotizaciones.</div>'; }
 }
-document.getElementById('search-clientes').oninput = (e) => {
-  const t = e.target.value.toLowerCase();
-  renderClientes(todosLosClientes.filter(c => c.nombre.toLowerCase().includes(t) || (c.empresa && c.empresa.toLowerCase().includes(t))));
-};
-cargarClientes();
-window.onresize = () => { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); };
 </script>
 </body>
 </html>

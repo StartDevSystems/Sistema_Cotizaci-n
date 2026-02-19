@@ -1,283 +1,875 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlueSky Energy — Nueva Cotización</title>
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo 1.2.png') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlueSky Energy — Nueva Cotización</title>
+<link rel="icon" type="image/jpg" href="{{ url_for('static', filename='img/logo.jpg') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<style>
+:root {
+  --bg:    #07090f;
+  --card:  #0e1520;
+  --card2: #111d2e;
+  --bdr:   rgba(255,255,255,0.07);
+  --bdr2:  rgba(255,255,255,0.04);
+  --text:  #f0f4ff;
+  --sub:   #7a8899;
+  --dim:   #33404f;
+  --blue:  #4f9eff;
+  --cyan:  #00d4ff;
+  --green: #00e5a0;
+  --amber: #f5a623;
+  --red:   #ff4d6a;
+  --input: #0a1221;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Outfit', sans-serif; font-size: 16px; line-height: 1.5;
+  overflow-x: hidden; min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
 
-    <style>
-        :root {
-            --bg: #07090f;
-            --card: #0e1520;
-            --bdr: rgba(255,255,255,0.15);
-            --text: #f0f4ff;
-            --blue: #4f9eff;
-            --neon: #2cb0e8;
-        }
+#bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.78; }
 
-        body {
-            background: var(--bg) !important;
-            color: #ffffff !important;
-            font-family: 'Outfit', sans-serif;
-            font-size: 18px;
-            margin: 0;
-            overflow-x: hidden;
-            min-height: 100vh;
-            color-scheme: dark;
-        }
+.shell { position: relative; z-index: 2; display: flex; min-height: 100vh; }
 
-        #three-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.4; }
-        .shell { position: relative; z-index: 2; display: flex; min-height: 100vh; }
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 72px; position: fixed; left: 0; top: 0; bottom: 0;
+  background: rgba(8,11,18,0.95); backdrop-filter: blur(28px);
+  border-right: 1px solid var(--bdr);
+  display: flex; flex-direction: column; align-items: center;
+  padding: 28px 0; z-index: 100;
+  transition: width 0.36s cubic-bezier(.22,1,.36,1);
+}
+.sidebar:hover { width: 240px; }
+.sb-logo { width: 100%; display: flex; align-items: center; gap: 14px; padding: 0 20px; margin-bottom: 40px; overflow: hidden; }
+.sb-mark { width: 36px; height: 36px; flex-shrink: 0; border-radius: 9px; background: var(--blue); display: grid; place-items: center; }
+.sb-mark svg { width: 17px; height: 17px; fill: none; stroke: #fff; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.sb-name { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 0.14em; color: var(--text); white-space: nowrap; opacity: 0; transition: opacity 0.2s 0.08s; }
+.sidebar:hover .sb-name { opacity: 1; }
+.nav-group { width: 100%; display: flex; flex-direction: column; gap: 2px; }
+.nav-link {
+  width: 100%; display: flex; align-items: center; gap: 16px; padding: 14px 20px;
+  text-decoration: none; color: var(--sub); font-size: 15px; font-weight: 400;
+  transition: all 0.15s; white-space: nowrap; overflow: hidden; border-left: 2px solid transparent;
+}
+.nav-link.active { color: var(--text); border-left-color: var(--blue); background: rgba(79,158,255,0.08); }
+.nav-link:hover:not(.active) { color: var(--text); background: rgba(255,255,255,0.04); }
+.nav-ico { width: 24px; flex-shrink: 0; display: grid; place-items: center; }
+.nav-ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.nav-txt { opacity: 0; transition: opacity 0.2s 0.08s; }
+.sidebar:hover .nav-txt { opacity: 1; }
+.sb-gap { flex: 1; }
 
-        /* SIDEBAR */
-        .sidebar {
-            width: 72px; position: fixed; left: 0; top: 0; bottom: 0;
-            background: rgba(8,11,18,0.98); backdrop-filter: blur(30px);
-            border-right: 1px solid var(--bdr);
-            display: flex; flex-direction: column; align-items: center;
-            padding: 28px 0; z-index: 100;
-            transition: width 0.3s cubic-bezier(.22,1,.36,1);
-        }
-        .sidebar:hover { width: 240px; }
-        .sb-logo { width: 100%; display: flex; align-items: center; gap: 14px; padding: 0 20px; margin-bottom: 40px; overflow: hidden; }
-        .sb-name { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.14em; white-space: nowrap; opacity: 0; transition: 0.2s; color: #fff; }
-        .sidebar:hover .sb-name { opacity: 1; }
+/* ── MAIN ── */
+.main { margin-left: 72px; flex: 1; padding: 0 52px 120px; max-width: 1400px; }
 
-        .nav-link {
-            width: 100%; display: flex; align-items: center; gap: 16px; padding: 18px 24px;
-            text-decoration: none; color: #7a8899; transition: 0.2s; white-space: nowrap; overflow: hidden;
-        }
-        .nav-link.active { color: #fff; background: rgba(79,158,255,0.1); border-left: 3px solid var(--blue); }
-        .nav-ico { width: 28px; display: grid; place-items: center; }
-        .nav-ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+/* ── TOPBAR ── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 40px 0 48px;
+  position: sticky; top: 0;
+  background: linear-gradient(to bottom, var(--bg) 70%, transparent);
+  z-index: 50;
+}
+.tb-section { font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 0.26em; color: var(--dim); margin-bottom: 6px; }
+.tb-title { font-size: 26px; font-weight: 600; color: var(--text); letter-spacing: -0.02em; }
+.tb-right { display: flex; align-items: center; gap: 14px; }
+.ava { width: 40px; height: 40px; border-radius: 50%; background: var(--blue); display: grid; place-items: center; font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 0.08em; color: #fff; cursor: pointer; border: 1px solid rgba(79,158,255,0.35); }
 
-        /* MOBILE NAV */
-        .mobile-nav {
-            display: none; position: fixed; bottom: 0; left: 0; right: 0;
-            height: 68px; z-index: 200;
-            background: rgba(8,11,18,0.97); backdrop-filter: blur(24px);
-            border-top: 1px solid var(--bdr);
-            align-items: center; justify-content: space-around; padding: 0 8px;
-        }
-        .mnav-btn {
-            display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1;
-            text-decoration: none; color: #7a8899; font-size: 11px; font-weight: 500; text-transform: uppercase;
-        }
-        .mnav-btn.active { color: var(--blue); }
-        .mnav-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; }
+/* ── SECTION LABEL ── */
+.slabel { font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 0.28em; color: var(--dim); margin-bottom: 20px; padding-left: 2px; }
 
-        /* MAIN CONTENT */
-        .main-content { 
-            flex: 1; 
-            margin-left: 72px; 
-            padding: 40px; 
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-        }
-        
-        .premium-card {
-            background: rgba(14, 21, 32, 0.85);
-            backdrop-filter: blur(25px);
-            border: 1px solid var(--bdr);
-            border-radius: 24px;
-            padding: 40px;
-            width: 100%;
-            max-width: 1200px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
-        }
+/* ── PANEL ── */
+.panel {
+  background: var(--card); border: 1px solid var(--bdr);
+  border-radius: 20px; padding: 40px;
+  margin-bottom: 24px;
+}
+.panel-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-bottom: 28px; border-bottom: 1px solid var(--bdr2); margin-bottom: 36px;
+}
+.panel-title { font-size: 17px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+.panel-sub { font-size: 14px; color: var(--sub); margin-top: 4px; }
 
-        .section-title { font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 0.05em; color: var(--blue); margin-bottom: 30px; }
+/* ── FORM GRID ── */
+.form-row { display: grid; gap: 20px; margin-bottom: 28px; }
+.form-row.cols-3 { grid-template-columns: 2fr 1fr 1fr; }
+.form-row.cols-2 { grid-template-columns: 1fr 1fr; }
+.form-row.cols-1 { grid-template-columns: 1fr; }
 
-        input, textarea, select, .form-control, .form-select {
-            background-color: #121520 !important;
-            border: 1px solid var(--bdr) !important;
-            color: #ffffff !important;
-            border-radius: 12px !important;
-            padding: 18px 24px !important;
-            font-size: 18px !important;
-        }
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 12px; letter-spacing: 0.22em;
+  color: var(--dim); text-transform: uppercase;
+}
+.field input,
+.field select,
+.field textarea {
+  background: var(--input); border: 1px solid var(--bdr);
+  border-radius: 12px; padding: 14px 18px;
+  color: var(--text); font-family: 'Outfit', sans-serif;
+  font-size: 15px; font-weight: 400;
+  outline: none; transition: border-color 0.18s, box-shadow 0.18s;
+  appearance: none; -webkit-appearance: none;
+  width: 100%;
+}
+.field input::placeholder,
+.field textarea::placeholder { color: var(--dim); }
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: rgba(79,158,255,0.45);
+  box-shadow: 0 0 0 3px rgba(79,158,255,0.08);
+}
+.field select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a8899' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 42px; }
+.field textarea { resize: vertical; min-height: 110px; line-height: 1.6; }
 
-        .form-label { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--blue) !important; margin-bottom: 12px; display: block; }
-        .total-display { font-family: 'Bebas Neue', sans-serif; font-size: 82px; color: white; line-height: 1; }
+/* ── AUTOCOMPLETE ── */
+.field-wrap { position: relative; }
+.autocomplete-list {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 200;
+  background: var(--card2); border: 1px solid rgba(79,158,255,0.2);
+  border-radius: 12px; overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+  max-height: 220px; overflow-y: auto;
+}
+.autocomplete-list div {
+  padding: 13px 18px; font-size: 14px; cursor: pointer;
+  border-bottom: 1px solid var(--bdr2);
+  transition: background 0.12s; color: var(--text);
+}
+.autocomplete-list div:last-child { border-bottom: none; }
+.autocomplete-list div:hover { background: rgba(79,158,255,0.1); }
+.autocomplete-list div span { color: var(--sub); font-size: 13px; }
 
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .sidebar { display: none; }
-            .mobile-nav { display: flex; }
-            .main-content { margin-left: 0; padding: 20px 15px 100px; }
-            .premium-card { padding: 25px 15px; border-radius: 16px; }
-            .section-title { font-size: 32px; }
-            .total-display { font-size: 54px; text-align: center; }
-            .total-lbl { text-align: center; }
-            .row > div { margin-bottom: 15px; }
-            .btn-premium { width: 100%; padding: 15px; }
-        }
-    </style>
+/* ── ITEMS TABLE ── */
+.items-section { margin-bottom: 28px; }
+.items-header {
+  display: grid;
+  grid-template-columns: 1fr 100px 140px 120px 48px;
+  gap: 12px; padding: 0 0 14px;
+  border-bottom: 1px solid var(--bdr);
+  margin-bottom: 12px;
+}
+.items-header span {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 12px; letter-spacing: 0.2em;
+  color: var(--dim);
+}
+.item-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 140px 120px 48px;
+  gap: 12px; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid var(--bdr2);
+  animation: rowIn 0.25s ease;
+}
+@keyframes rowIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
+.item-row:last-child { border-bottom: none; }
+
+.item-row input {
+  background: var(--input); border: 1px solid var(--bdr);
+  border-radius: 10px; padding: 12px 14px;
+  color: var(--text); font-family: 'Outfit', sans-serif;
+  font-size: 14px; outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s; width: 100%;
+}
+.item-row input::placeholder { color: var(--dim); }
+.item-row input:focus { border-color: rgba(79,158,255,0.45); box-shadow: 0 0 0 3px rgba(79,158,255,0.08); }
+.item-row input[readonly] { color: var(--green); font-weight: 600; cursor: default; border-color: transparent; background: rgba(0,229,160,0.05); }
+
+.btn-remove {
+  width: 38px; height: 38px; border-radius: 9px;
+  background: rgba(255,77,106,0.08); border: 1px solid rgba(255,77,106,0.15);
+  color: var(--red); cursor: pointer;
+  display: grid; place-items: center;
+  transition: background 0.15s, transform 0.15s;
+  flex-shrink: 0;
+}
+.btn-remove:hover { background: rgba(255,77,106,0.18); transform: scale(1.05); }
+.btn-remove svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── ADD ROW BTN ── */
+.btn-add-row {
+  width: 100%; padding: 14px;
+  background: transparent; border: 1px dashed rgba(79,158,255,0.2);
+  border-radius: 12px; color: var(--blue);
+  font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 0.16em;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: background 0.15s, border-color 0.15s;
+  margin-top: 16px;
+}
+.btn-add-row:hover { background: rgba(79,158,255,0.06); border-color: rgba(79,158,255,0.35); }
+.btn-add-row svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── TOTAL AREA ── */
+.total-area {
+  display: flex; justify-content: flex-end; align-items: flex-end;
+  gap: 12px; padding-top: 24px;
+  border-top: 1px solid var(--bdr2);
+  margin-top: 24px;
+}
+.total-label { font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 0.22em; color: var(--dim); margin-bottom: 6px; }
+.total-val { font-family: 'Bebas Neue', sans-serif; font-size: 52px; letter-spacing: 0.01em; line-height: 1; color: var(--text); }
+
+/* ── ACTIONS ── */
+.actions-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding-top: 36px;
+  border-top: 1px solid var(--bdr2); margin-top: 4px;
+}
+.btn-catalogo {
+  display: flex; align-items: center; gap: 9px;
+  background: rgba(79,158,255,0.07); border: 1px solid rgba(79,158,255,0.18);
+  border-radius: 12px; padding: 14px 22px;
+  color: var(--blue); font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px; letter-spacing: 0.14em;
+  cursor: pointer; transition: background 0.15s;
+}
+.btn-catalogo:hover { background: rgba(79,158,255,0.14); }
+.btn-catalogo svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+.btn-save {
+  flex: 1; max-width: 420px;
+  padding: 18px 40px;
+  background: var(--blue); border: none; border-radius: 14px;
+  color: #fff; font-family: 'Bebas Neue', sans-serif;
+  font-size: 17px; letter-spacing: 0.18em;
+  cursor: pointer; transition: opacity 0.15s, transform 0.15s;
+  position: relative; overflow: hidden;
+}
+.btn-save::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent); }
+.btn-save:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-save:active { transform: translateY(0); }
+
+.download-area { display: none; align-items: center; gap: 12px; }
+.btn-dl {
+  display: flex; align-items: center; gap: 9px;
+  padding: 14px 22px; border-radius: 12px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 0.14em;
+  cursor: pointer; text-decoration: none; border: 1px solid;
+  transition: opacity 0.15s;
+}
+.btn-dl:hover { opacity: 0.8; }
+.btn-dl-pdf { background: rgba(255,77,106,0.08); border-color: rgba(255,77,106,0.2); color: var(--red); }
+.btn-dl-xlsx { background: rgba(0,229,160,0.08); border-color: rgba(0,229,160,0.2); color: var(--green); }
+.btn-dl svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px); z-index: 500;
+  display: none; place-items: center;
+}
+.modal-overlay.open { display: grid; }
+.modal {
+  background: var(--card); border: 1px solid var(--bdr);
+  border-radius: 20px; padding: 36px;
+  width: 90%; max-width: 700px; max-height: 85vh;
+  overflow: hidden; display: flex; flex-direction: column;
+  animation: modalIn 0.28s cubic-bezier(.22,1,.36,1);
+}
+@keyframes modalIn { from { opacity:0; transform: scale(0.96) translateY(12px); } to { opacity:1; transform: none; } }
+.modal-head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding-bottom: 22px; border-bottom: 1px solid var(--bdr2); margin-bottom: 24px;
+}
+.modal-title { font-size: 17px; font-weight: 600; color: var(--text); }
+.modal-sub { font-size: 14px; color: var(--sub); margin-top: 4px; }
+.btn-close {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: rgba(255,255,255,0.05); border: 1px solid var(--bdr);
+  color: var(--sub); cursor: pointer; display: grid; place-items: center;
+  transition: background 0.15s; flex-shrink: 0;
+}
+.btn-close:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+.btn-close svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.modal-search-row { display: flex; gap: 12px; margin-bottom: 20px; }
+.modal-search {
+  flex: 1; background: var(--input); border: 1px solid var(--bdr);
+  border-radius: 10px; padding: 12px 16px;
+  color: var(--text); font-family: 'Outfit', sans-serif; font-size: 15px;
+  outline: none; transition: border-color 0.18s;
+}
+.modal-search:focus { border-color: rgba(79,158,255,0.4); }
+.modal-search::placeholder { color: var(--dim); }
+.btn-new-prod {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 18px; border-radius: 10px;
+  background: rgba(79,158,255,0.08); border: 1px solid rgba(79,158,255,0.18);
+  color: var(--blue); font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px; letter-spacing: 0.12em; cursor: pointer; transition: background 0.15s;
+  white-space: nowrap;
+}
+.btn-new-prod:hover { background: rgba(79,158,255,0.15); }
+.btn-new-prod svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.prod-list { overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.prod-card {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding: 16px 18px;
+  background: rgba(255,255,255,0.02); border: 1px solid var(--bdr2);
+  border-radius: 12px; transition: border-color 0.15s, background 0.15s;
+}
+.prod-card:hover { border-color: rgba(79,158,255,0.2); background: rgba(79,158,255,0.04); }
+.prod-info { flex: 1; }
+.prod-name { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+.prod-desc { font-size: 13px; color: var(--sub); }
+.prod-right { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+.prod-price { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 0.04em; color: var(--green); }
+.btn-add-prod {
+  padding: 9px 16px; border-radius: 9px;
+  background: rgba(79,158,255,0.1); border: 1px solid rgba(79,158,255,0.2);
+  color: var(--blue); font-family: 'Bebas Neue', sans-serif;
+  font-size: 12px; letter-spacing: 0.12em; cursor: pointer; transition: background 0.15s;
+}
+.btn-add-prod:hover { background: rgba(79,158,255,0.2); }
+
+/* Form nuevo producto */
+.new-prod-form { display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px; }
+.new-prod-form input {
+  background: var(--input); border: 1px solid var(--bdr);
+  border-radius: 10px; padding: 13px 16px;
+  color: var(--text); font-family: 'Outfit', sans-serif; font-size: 15px;
+  outline: none; transition: border-color 0.18s;
+}
+.new-prod-form input:focus { border-color: rgba(79,158,255,0.4); }
+.new-prod-form input::placeholder { color: var(--dim); }
+.btn-save-prod {
+  width: 100%; padding: 14px;
+  background: var(--blue); border: none; border-radius: 10px;
+  color: #fff; font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px; letter-spacing: 0.16em; cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn-save-prod:hover { opacity: 0.88; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 32px; right: 32px; z-index: 999;
+  padding: 16px 24px; border-radius: 14px;
+  background: var(--card); border: 1px solid var(--bdr);
+  font-size: 15px; font-weight: 500; color: var(--text);
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  transform: translateY(16px); opacity: 0;
+  transition: all 0.3s cubic-bezier(.22,1,.36,1);
+  pointer-events: none;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.toast.ok  .toast-dot { background: var(--green); }
+.toast.err .toast-dot { background: var(--red); }
+
+/* ── MOBILE NAV ── */
+.mobile-nav {
+  display: none; position: fixed; bottom: 0; left: 0; right: 0;
+  height: 68px; z-index: 200;
+  background: rgba(8,11,18,0.97); backdrop-filter: blur(24px);
+  border-top: 1px solid var(--bdr);
+  align-items: center; justify-content: space-around; padding: 0 8px;
+}
+.mnav-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1;
+  text-decoration: none; color: var(--dim);
+  font-size: 11px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase;
+  padding: 8px 4px; transition: color 0.15s;
+}
+.mnav-btn.active { color: var(--blue); }
+.mnav-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 2px; }
+
+/* ── LOADER ── */
+.loader {
+  position: fixed; inset: 0; background: var(--bg); z-index: 9999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+}
+.loader-name { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.32em; color: var(--sub); }
+.loader-bar { width: 130px; height: 1px; background: var(--bdr); overflow: hidden; }
+.loader-fill { height: 100%; background: var(--blue); width: 0; animation: lp 1.4s ease forwards; }
+@keyframes lp { to { width: 100%; } }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .mobile-nav { display: flex; }
+  .main { margin-left: 0; padding: 0 18px 80px; }
+  .topbar { padding: 24px 0 28px; }
+  .panel { padding: 24px; }
+  .form-row.cols-3 { grid-template-columns: 1fr; }
+  .form-row.cols-2 { grid-template-columns: 1fr; }
+  .items-header { grid-template-columns: 1fr 80px 110px 95px 40px; }
+  .item-row { grid-template-columns: 1fr 80px 110px 95px 40px; }
+  .actions-row { flex-direction: column; }
+  .btn-save { max-width: 100%; width: 100%; }
+  .total-val { font-size: 40px; }
+}
+@media (max-width: 520px) {
+  .main { padding: 0 14px 80px; }
+  .panel { padding: 18px; border-radius: 16px; }
+  .items-header { display: none; }
+  .item-row { grid-template-columns: 1fr 70px; grid-template-rows: auto auto; gap: 8px; padding: 12px 0; }
+  .item-row input:nth-child(1) { grid-column: 1 / -1; }
+}
+</style>
 </head>
 <body>
 
-    <canvas id="three-canvas"></canvas>
+<div class="loader" id="loader">
+  <div class="loader-name">BlueSky Energy</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+</div>
 
-    <div class="shell">
-        <!-- SIDEBAR -->
-        <aside class="sidebar">
-            <div class="sb-logo">
-                <img src="{{ url_for('static', filename='img/logo 1.2.png') }}" alt="Logo" style="height: 32px;">
-                <span class="sb-name">BlueSky Energy</span>
-            </div>
-            <nav class="nav-group w-100">
-                <a href="/dashboard" class="nav-link">
-                    <span class="nav-ico"><svg viewBox="0 0 24 24" style="stroke:currentColor; stroke-width:1.8; fill:none;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
-                    <span class="sb-name">Dashboard</span>
-                </a>
-                <a href="/" class="nav-link active">
-                    <span class="nav-ico"><svg viewBox="0 0 24 24" style="stroke:currentColor; stroke-width:1.8; fill:none;"><path d="M12 5v14M5 12h14"/></svg></span>
-                    <span class="sb-name">Nueva</span>
-                </a>
-                <a href="/cotizaciones" class="nav-link">
-                    <span class="nav-ico"><svg viewBox="0 0 24 24" style="stroke:currentColor; stroke-width:1.8; fill:none;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
-                    <span class="sb-name">Cotizaciones</span>
-                </a>
-                <a href="/clientes" class="nav-link">
-                    <span class="nav-ico"><svg viewBox="0 0 24 24" style="stroke:currentColor; stroke-width:1.8; fill:none;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>
-                    <span class="sb-name">Clientes</span>
-                </a>
-            </nav>
-        </aside>
+<div class="shell">
 
-        <!-- MOBILE NAV -->
-        <nav class="mobile-nav">
-            <a href="/dashboard" class="mnav-btn">
-                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-                <span>Panel</span>
-            </a>
-            <a href="/" class="mnav-btn active">
-                <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-                <span>Nueva</span>
-            </a>
-            <a href="/cotizaciones" class="mnav-btn">
-                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
-                <span>Listado</span>
-            </a>
-            <a href="/clientes" class="mnav-btn">
-                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                <span>Clientes</span>
-            </a>
-        </nav>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-mark">
+        <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <span class="sb-name">BlueSky Energy</span>
+    </div>
+    <nav class="nav-group">
+      <a href="/dashboard" class="nav-link">
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+        <span class="nav-txt">Dashboard</span>
+      </a>
+      <a href="/" class="nav-link active">
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+        <span class="nav-txt">Nueva Cotización</span>
+      </a>
+      <a href="/cotizaciones" class="nav-link">
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+        <span class="nav-txt">Cotizaciones</span>
+      </a>
+      <a href="/clientes" class="nav-link">
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+        <span class="nav-txt">Clientes</span>
+      </a>
+    </nav>
+    <div class="sb-gap"></div>
+  </aside>
 
-        <main class="main-content">
-            <div class="premium-card">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h1 class="section-title mb-0">Emisión</h1>
-                    <button class="btn btn-outline-info btn-sm px-3" data-bs-toggle="modal" data-bs-target="#productosModal">📂 CATÁLOGO</button>
-                </div>
+  <!-- MAIN -->
+  <main class="main">
 
-                <form id="cotizacion-form">
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label">Cliente</label>
-                            <div class="position-relative">
-                                <input type="text" class="form-control" id="cliente" placeholder="Escribe para buscar..." required autocomplete="off">
-                                <div id="cliente-autocomplete" class="autocomplete-items"></div>
-                            </div>
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <label class="form-label">Fecha</label>
-                            <input type="date" class="form-control" id="fecha" required>
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <label class="form-label">Estado</label>
-                            <select class="form-select" id="estado">
-                                <option value="Pendiente">Pendiente</option>
-                                <option value="Aprobada">Aprobada</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="table-responsive mb-4">
-                        <table class="table" id="items-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 50%;">DETALLE</th>
-                                    <th style="width: 10%;">CANT</th>
-                                    <th style="width: 20%;">PRECIO</th>
-                                    <th style="width: 20%;">TOTAL</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody id="items-tbody"></tbody>
-                        </table>
-                    </div>
-
-                    <button type="button" class="btn btn-sm btn-outline-secondary w-100 mb-4" id="add-row-btn">+ AGREGAR LÍNEA</button>
-
-                    <div class="row align-items-end mt-4">
-                        <div class="col-md-7 mb-4">
-                            <label class="form-label">Notas</label>
-                            <textarea class="form-control" id="notas" rows="3" placeholder="Validez, condiciones..."></textarea>
-                        </div>
-                        <div class="col-md-5 text-end">
-                            <p class="form-label mb-1 total-lbl">VALOR ESTIMADO</p>
-                            <div class="total-display" id="total-general">$0.00</div>
-                        </div>
-                    </div>
-
-                    <div class="text-center mt-5">
-                        <button type="submit" class="btn btn-main btn-lg w-100" style="background:var(--blue); border:none; padding:20px; border-radius:15px; font-family:'Bebas Neue'; letter-spacing:2px;">GUARDAR COTIZACIÓN</button>
-                        <div id="download-buttons-area" class="mt-4" style="display: none; gap:10px; justify-content:center;">
-                            <a href="#" id="pdf-download-link" class="btn btn-danger btn-lg px-4" target="_blank">PDF</a>
-                            <a href="#" id="excel-download-link" class="btn btn-success btn-lg px-4">EXCEL</a>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </main>
+    <div class="topbar">
+      <div>
+        <div class="tb-section">Sistema de Gestión / Emisión</div>
+        <div class="tb-title">Nueva Cotización</div>
+      </div>
+      <div class="tb-right">
+        <div class="ava">BE</div>
+      </div>
     </div>
 
-    <!-- MODAL CATÁLOGO -->
-    <div class="modal fade" id="productosModal" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content" style="background: #0e1520; border: 1px solid var(--bdr); border-radius: 24px;">
-                <div class="modal-header border-0 p-4 pb-0">
-                    <h5 class="modal-title section-title" style="font-size: 28px; margin: 0;">Productos</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4 pt-0">
-                    <input type="text" class="form-control mb-4" id="search-productos" placeholder="Buscar...">
-                    <div class="table-responsive" style="max-height: 300px;">
-                        <table class="table">
-                            <thead><tr><th>PRODUCTO</th><th>PRECIO</th><th></th></tr></thead>
-                            <tbody id="productos-tbody"></tbody>
-                        </table>
-                    </div>
-                </div>
+    <form id="cotizacion-form">
+
+      <!-- PANEL: Datos del cliente -->
+      <div class="slabel">Información del documento</div>
+      <div class="panel">
+        <div class="form-row cols-3">
+          <div class="field">
+            <label class="field-label">Cliente</label>
+            <div class="field-wrap">
+              <input type="text" id="cliente" placeholder="Escribe para buscar…" autocomplete="off" required>
+              <div class="autocomplete-list" id="autocomplete-list" style="display:none"></div>
             </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Fecha</label>
+            <input type="date" id="fecha" required>
+          </div>
+          <div class="field">
+            <label class="field-label">Estado</label>
+            <select id="estado">
+              <option value="Pendiente">Pendiente</option>
+              <option value="Aprobada">Aprobada</option>
+              <option value="Rechazada">Rechazada</option>
+              <option value="En Revisión">En Revisión</option>
+            </select>
+          </div>
         </div>
+
+        <!-- ITEMS -->
+        <div class="slabel" style="margin-top:8px">Conceptos</div>
+        <div class="items-section">
+          <div class="items-header">
+            <span>Detalle</span>
+            <span>Cant.</span>
+            <span>Precio</span>
+            <span>Total</span>
+            <span></span>
+          </div>
+          <div id="items-list"></div>
+        </div>
+
+        <button type="button" class="btn-add-row" id="btn-add-row">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          Agregar línea
+        </button>
+
+        <!-- TOTAL -->
+        <div class="total-area">
+          <div style="text-align:right">
+            <div class="total-label">Valor estimado</div>
+            <div class="total-val" id="total-val">$0.00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL: Notas -->
+      <div class="panel">
+        <div class="field">
+          <label class="field-label">Notas / Condiciones</label>
+          <textarea id="notas" placeholder="Validez de la cotización, condiciones de pago, garantías…"></textarea>
+        </div>
+      </div>
+
+      <!-- ACCIONES -->
+      <div class="panel" style="padding: 28px 40px;">
+        <div class="actions-row">
+          <button type="button" class="btn-catalogo" id="btn-catalogo">
+            <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            Catálogo de Productos
+          </button>
+
+          <div class="download-area" id="download-area">
+            <a href="#" id="link-pdf" class="btn-dl btn-dl-pdf" target="_blank">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Descargar PDF
+            </a>
+            <a href="#" id="link-excel" class="btn-dl btn-dl-xlsx">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+              Descargar Excel
+            </a>
+          </div>
+
+          <button type="submit" class="btn-save" id="btn-save">
+            Guardar Cotización
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </main>
+</div>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav">
+  <a href="/dashboard" class="mnav-btn">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Panel
+  </a>
+  <a href="/" class="mnav-btn active">
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nueva
+  </a>
+  <a href="/cotizaciones" class="mnav-btn">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Cotizaciones
+  </a>
+  <a href="/clientes" class="mnav-btn">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Clientes
+  </a>
+</nav>
+
+<!-- MODAL CATÁLOGO -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Catálogo de Productos</div>
+        <div class="modal-sub">Selecciona un producto para agregarlo</div>
+      </div>
+      <button class="btn-close" id="btn-close-modal">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}?v=2.2"></script>
-    <script>
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        const group = new THREE.Group(); scene.add(group);
-        const count = 60; const pos = new Float32Array(count*3);
-        for(let i=0; i<count*3; i++) pos[i] = (Math.random()-0.5)*12;
-        const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-        group.add(new THREE.Points(geo, new THREE.PointsMaterial({size: 0.1, color: '#4f9eff', transparent: true, opacity: 0.8})));
-        camera.position.z = 5;
-        function anim() { requestAnimationFrame(anim); group.rotation.y += 0.001; renderer.render(scene, camera); } anim();
-        window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
-    </script>
+    <!-- Buscar y nuevo -->
+    <div class="modal-search-row">
+      <input type="text" class="modal-search" id="search-prod" placeholder="Buscar producto…">
+      <button type="button" class="btn-new-prod" id="btn-show-new-prod">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Nuevo
+      </button>
+    </div>
+
+    <!-- Form nuevo producto (oculto) -->
+    <div class="new-prod-form" id="new-prod-form" style="display:none">
+      <input type="text" id="np-nombre" placeholder="Nombre del producto *">
+      <input type="text" id="np-desc"   placeholder="Descripción *">
+      <input type="number" id="np-precio" placeholder="Precio *" step="0.01" min="0">
+      <button type="button" class="btn-save-prod" id="btn-guardar-prod">Guardar Producto</button>
+    </div>
+
+    <div class="prod-list" id="prod-list">
+      <p style="color:var(--dim);font-size:14px;padding:20px 0">Cargando productos…</p>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><div class="toast-dot"></div><span id="toast-msg"></span></div>
+
+<canvas id="bg-canvas"></canvas>
+
+<script>
+// ── THREE.JS ──
+(function(){
+  const c=document.getElementById('bg-canvas');
+  const r=new THREE.WebGLRenderer({canvas:c,alpha:true,antialias:true});
+  r.setPixelRatio(Math.min(devicePixelRatio,2));
+  r.setSize(innerWidth,innerHeight);
+  const scene=new THREE.Scene();
+  const cam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,0.1,100);
+  cam.position.z=5;
+  const N=1200,pos=new Float32Array(N*3),col=new Float32Array(N*3);
+  const palette=[new THREE.Color('#4f9eff'),new THREE.Color('#00e5a0'),new THREE.Color('#00d4ff'),new THREE.Color('#f5a623')];
+  for(let i=0;i<N;i++){
+    pos[i*3]=(Math.random()-.5)*24; pos[i*3+1]=(Math.random()-.5)*24; pos[i*3+2]=(Math.random()-.5)*10;
+    const cl=palette[Math.floor(Math.random()*4)]; col[i*3]=cl.r; col[i*3+1]=cl.g; col[i*3+2]=cl.b;
+  }
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('color',new THREE.BufferAttribute(col,3));
+  const pts=new THREE.Points(geo,new THREE.PointsMaterial({size:0.055,vertexColors:true,transparent:true,opacity:0.85}));
+  scene.add(pts);
+  const lm=new THREE.LineBasicMaterial({color:0x0f1e35,transparent:true,opacity:0.45});
+  for(let i=-10;i<=10;i+=2){
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-14,i*.75,-2),new THREE.Vector3(14,i*.75,-2)]),lm));
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(i,-10,-2),new THREE.Vector3(i,10,-2)]),lm));
+  }
+  const mk=(geo,mat)=>{ const m=new THREE.Mesh(geo,mat); return m; };
+  const r1=mk(new THREE.RingGeometry(2.5,2.52,80),new THREE.MeshBasicMaterial({color:0x4f9eff,side:THREE.DoubleSide,transparent:true,opacity:0.14}));
+  const r2=mk(new THREE.RingGeometry(4.0,4.02,80),new THREE.MeshBasicMaterial({color:0x00e5a0,side:THREE.DoubleSide,transparent:true,opacity:0.09}));
+  r1.rotation.x=Math.PI/3; r2.rotation.x=Math.PI/4; r2.rotation.y=Math.PI/6;
+  scene.add(r1); scene.add(r2);
+  let mx=0,my=0;
+  addEventListener('mousemove',e=>{mx=(e.clientX/innerWidth-.5)*.5;my=-(e.clientY/innerHeight-.5)*.5;});
+  addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();r.setSize(innerWidth,innerHeight);});
+  let t=0;
+  (function tick(){requestAnimationFrame(tick);t+=.003;pts.rotation.y=t*.06+mx*.8;pts.rotation.x=my*.4;r1.rotation.z=t*.2;r2.rotation.z=-t*.12;r1.rotation.y=t*.08;cam.position.x+=(mx*.6-cam.position.x)*.04;cam.position.y+=(my*.6-cam.position.y)*.04;r.render(scene,cam);})();
+})();
+
+// ── GSAP LOADER ──
+window.addEventListener('load',()=>{
+  gsap.to('#loader',{opacity:0,duration:.5,delay:1.2,onComplete:()=>document.getElementById('loader').style.display='none'});
+  gsap.from('.topbar',{y:-14,opacity:0,duration:.55,delay:1.35,ease:'power3.out'});
+  gsap.from('.panel',{y:22,opacity:0,duration:.55,stagger:.1,delay:1.5,ease:'power3.out'});
+});
+
+// ── TOAST ──
+function toast(msg, type='ok'){
+  const t=document.getElementById('toast');
+  t.className='toast '+type;
+  document.getElementById('toast-msg').textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ── FORMAT ──
+function fmtMoney(n){
+  return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2}).format(n);
+}
+
+// ── ITEMS ──
+let itemCount=0;
+
+function addItem(desc='', qty=1, price=0){
+  itemCount++;
+  const id='item-'+itemCount;
+  const row=document.createElement('div');
+  row.className='item-row'; row.id=id;
+  row.innerHTML=`
+    <input type="text"   class="i-desc"  placeholder="Descripción del servicio…" value="${desc}">
+    <input type="number" class="i-qty"   value="${qty}"  min="1" step="1">
+    <input type="number" class="i-price" value="${price||''}" placeholder="0.00" step="0.01" min="0">
+    <input type="text"   class="i-total" readonly value="${price?fmtMoney(qty*price):'$0.00'}">
+    <button type="button" class="btn-remove" onclick="removeItem('${id}')">
+      <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+    </button>`;
+  document.getElementById('items-list').appendChild(row);
+  row.querySelectorAll('.i-qty,.i-price').forEach(el=>el.addEventListener('input',()=>recalcRow(row)));
+  recalcRow(row);
+}
+
+function removeItem(id){
+  const row=document.getElementById(id);
+  if(document.querySelectorAll('.item-row').length<=1){ toast('Debe haber al menos una línea','err'); return; }
+  gsap.to(row,{opacity:0,x:-16,duration:0.2,onComplete:()=>{row.remove();recalcTotal();}});
+}
+
+function recalcRow(row){
+  const qty=parseFloat(row.querySelector('.i-qty').value)||0;
+  const price=parseFloat(row.querySelector('.i-price').value)||0;
+  row.querySelector('.i-total').value=fmtMoney(qty*price);
+  recalcTotal();
+}
+
+function recalcTotal(){
+  let total=0;
+  document.querySelectorAll('.item-row').forEach(r=>{
+    const qty=parseFloat(r.querySelector('.i-qty').value)||0;
+    const price=parseFloat(r.querySelector('.i-price').value)||0;
+    total+=qty*price;
+  });
+  document.getElementById('total-val').textContent=fmtMoney(total);
+}
+
+document.getElementById('btn-add-row').addEventListener('click',()=>addItem());
+addItem(); // primera fila
+
+// fecha hoy
+document.getElementById('fecha').valueAsDate=new Date();
+
+// ── AUTOCOMPLETE CLIENTES ──
+let clientesCache=[];
+fetch('/api/clientes').then(r=>r.json()).then(d=>{ if(d.status==='ok') clientesCache=d.clientes; });
+
+const clienteInput=document.getElementById('cliente');
+const acList=document.getElementById('autocomplete-list');
+
+clienteInput.addEventListener('input',function(){
+  const q=this.value.toLowerCase().trim();
+  acList.innerHTML=''; acList.style.display='none';
+  if(!q) return;
+  const matches=clientesCache.filter(c=>c.nombre.toLowerCase().includes(q)).slice(0,6);
+  if(!matches.length) return;
+  matches.forEach(c=>{
+    const div=document.createElement('div');
+    div.innerHTML=`<strong>${c.nombre}</strong>${c.empresa?` <span>· ${c.empresa}</span>`:''}`;
+    div.addEventListener('click',()=>{ clienteInput.value=c.nombre; acList.style.display='none'; });
+    acList.appendChild(div);
+  });
+  acList.style.display='block';
+});
+document.addEventListener('click',e=>{ if(e.target!==clienteInput) acList.style.display='none'; });
+
+// ── CATÁLOGO ──
+let productosCache=[];
+
+function abrirCatalogo(){
+  document.getElementById('modal-overlay').classList.add('open');
+  cargarProductos();
+}
+function cerrarCatalogo(){
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+document.getElementById('btn-catalogo').addEventListener('click', abrirCatalogo);
+document.getElementById('btn-close-modal').addEventListener('click', cerrarCatalogo);
+document.getElementById('modal-overlay').addEventListener('click',e=>{ if(e.target===document.getElementById('modal-overlay')) cerrarCatalogo(); });
+
+async function cargarProductos(){
+  const res=await fetch('/api/productos').then(r=>r.json());
+  if(res.status==='ok'){ productosCache=res.productos; renderProductos(productosCache); }
+}
+
+function renderProductos(prods){
+  const list=document.getElementById('prod-list');
+  if(!prods.length){
+    list.innerHTML='<p style="color:var(--dim);font-size:14px;padding:20px 0">Sin productos. Agrega uno nuevo.</p>'; return;
+  }
+  list.innerHTML='';
+  prods.forEach(p=>{
+    const card=document.createElement('div'); card.className='prod-card';
+    card.innerHTML=`
+      <div class="prod-info">
+        <div class="prod-name">${p.nombre}</div>
+        <div class="prod-desc">${p.descripcion||'—'}</div>
+      </div>
+      <div class="prod-right">
+        <div class="prod-price">${fmtMoney(p.precio)}</div>
+        <button class="btn-add-prod">Agregar</button>
+      </div>`;
+    card.querySelector('.btn-add-prod').addEventListener('click',()=>{
+      addItem(p.descripcion||p.nombre, 1, p.precio);
+      cerrarCatalogo();
+    });
+    list.appendChild(card);
+  });
+}
+
+document.getElementById('search-prod').addEventListener('input',function(){
+  const q=this.value.toLowerCase();
+  renderProductos(productosCache.filter(p=>p.nombre.toLowerCase().includes(q)||p.descripcion.toLowerCase().includes(q)));
+});
+
+// Nuevo producto
+document.getElementById('btn-show-new-prod').addEventListener('click',()=>{
+  const f=document.getElementById('new-prod-form');
+  f.style.display=f.style.display==='none'?'flex':'none';
+});
+document.getElementById('btn-guardar-prod').addEventListener('click',async()=>{
+  const nombre=document.getElementById('np-nombre').value.trim();
+  const desc=document.getElementById('np-desc').value.trim();
+  const precio=parseFloat(document.getElementById('np-precio').value);
+  if(!nombre||!desc||isNaN(precio)){ toast('Completa todos los campos','err'); return; }
+  const res=await fetch('/api/productos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre,descripcion:desc,precio})}).then(r=>r.json());
+  if(res.status==='ok'){
+    toast('Producto guardado'); document.getElementById('new-prod-form').style.display='none';
+    document.getElementById('np-nombre').value=''; document.getElementById('np-desc').value=''; document.getElementById('np-precio').value='';
+    cargarProductos();
+  } else { toast('Error al guardar','err'); }
+});
+
+// ── GUARDAR COTIZACIÓN ──
+document.getElementById('cotizacion-form').addEventListener('submit',async function(e){
+  e.preventDefault();
+  const btn=document.getElementById('btn-save');
+  btn.textContent='Guardando…'; btn.disabled=true;
+
+  const items=[];
+  document.querySelectorAll('.item-row').forEach(r=>{
+    const desc=r.querySelector('.i-desc').value.trim();
+    if(desc) items.push({
+      descripcion: desc,
+      cantidad: parseFloat(r.querySelector('.i-qty').value)||1,
+      precio:   parseFloat(r.querySelector('.i-price').value)||0,
+    });
+  });
+
+  const data={
+    cliente: document.getElementById('cliente').value,
+    fecha:   document.getElementById('fecha').value,
+    estado:  document.getElementById('estado').value,
+    notas:   document.getElementById('notas').value,
+    items,
+    total:   document.getElementById('total-val').textContent,
+  };
+
+  try{
+    const res=await fetch('/guardar-cotizacion',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).then(r=>r.json());
+    if(res.status==='ok'){
+      toast(res.message||'Cotización guardada');
+      document.getElementById('link-pdf').href=`/descargar-pdf/${res.cotizacion_id}`;
+      document.getElementById('link-excel').href=`/descargar-excel/${res.cotizacion_id}`;
+      const da=document.getElementById('download-area');
+      da.style.display='flex';
+      gsap.from(da,{opacity:0,y:8,duration:0.3,ease:'power2.out'});
+      btn.textContent='Cotización Guardada';
+    } else {
+      toast('Error: '+(res.message||'Intenta de nuevo'),'err');
+      btn.textContent='Guardar Cotización'; btn.disabled=false;
+    }
+  } catch(err){
+    toast('Error de conexión','err');
+    btn.textContent='Guardar Cotización'; btn.disabled=false;
+  }
+});
+</script>
 </body>
 </html>

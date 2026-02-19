@@ -4,37 +4,40 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BlueSky Energy — Cotizaciones</title>
-<link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo 1.2.png') }}">
-
+<link rel="icon" type="image/jpg" href="{{ url_for('static', filename='img/logo.jpg') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-
 <style>
 :root {
   --bg:    #07090f;
   --card:  #0e1520;
+  --input: #0a1221;
   --bdr:   rgba(255,255,255,0.07);
-  --bdr2:  rgba(255,255,255,0.03);
+  --bdr2:  rgba(255,255,255,0.04);
   --text:  #f0f4ff;
   --sub:   #7a8899;
   --dim:   #33404f;
   --blue:  #4f9eff;
+  --cyan:  #00d4ff;
+  --green: #00e5a0;
+  --amber: #f5a623;
+  --red:   #ff4d6a;
 }
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 body {
   background: var(--bg); color: var(--text);
-  font-family: 'Outfit', sans-serif; font-size: 18px;
+  font-family: 'Outfit', sans-serif; font-size: 16px; line-height: 1.5;
   overflow-x: hidden; min-height: 100vh;
-  color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
 }
 
 #bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.78; }
 .shell { position: relative; z-index: 2; display: flex; min-height: 100vh; }
 
-/* SIDEBAR */
+/* ── SIDEBAR ── */
 .sidebar {
   width: 72px; position: fixed; left: 0; top: 0; bottom: 0;
   background: rgba(8,11,18,0.95); backdrop-filter: blur(28px);
@@ -45,192 +48,528 @@ body {
 }
 .sidebar:hover { width: 240px; }
 .sb-logo { width: 100%; display: flex; align-items: center; gap: 14px; padding: 0 20px; margin-bottom: 40px; overflow: hidden; }
-.sb-name { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 0.14em; color: var(--text); white-space: nowrap; opacity: 0; transition: 0.2s; }
+.sb-mark { width: 36px; height: 36px; flex-shrink: 0; border-radius: 9px; background: var(--blue); display: grid; place-items: center; }
+.sb-mark svg { width: 17px; height: 17px; fill: none; stroke: #fff; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.sb-name { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 0.14em; color: var(--text); white-space: nowrap; opacity: 0; transition: opacity 0.2s 0.08s; }
 .sidebar:hover .sb-name { opacity: 1; }
-
+.nav-group { width: 100%; display: flex; flex-direction: column; gap: 2px; }
 .nav-link {
-  width: 100%; display: flex; align-items: center; gap: 16px; padding: 18px 24px;
-  text-decoration: none; color: var(--sub); font-size: 17px;
-  transition: all 0.15s; white-space: nowrap; overflow: hidden;
-  border-left: 2px solid transparent;
+  width: 100%; display: flex; align-items: center; gap: 16px; padding: 14px 20px;
+  text-decoration: none; color: var(--sub); font-size: 15px; font-weight: 400;
+  transition: all 0.15s; white-space: nowrap; overflow: hidden; border-left: 2px solid transparent;
 }
 .nav-link.active { color: var(--text); border-left-color: var(--blue); background: rgba(79,158,255,0.08); }
-.nav-ico { width: 28px; flex-shrink: 0; display: grid; place-items: center; }
-.nav-ico svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; }
-.nav-txt { opacity: 0; transition: opacity 0.2s; }
+.nav-link:hover:not(.active) { color: var(--text); background: rgba(255,255,255,0.04); }
+.nav-ico { width: 24px; flex-shrink: 0; display: grid; place-items: center; }
+.nav-ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.nav-txt { opacity: 0; transition: opacity 0.2s 0.08s; }
 .sidebar:hover .nav-txt { opacity: 1; }
+.sb-gap { flex: 1; }
 
-/* MOBILE NAV */
-.mobile-nav {
-  display: none; position: fixed; bottom: 0; left: 0; right: 0;
-  height: 68px; z-index: 200;
-  background: rgba(8,11,18,0.97); backdrop-filter: blur(24px);
-  border-top: 1px solid var(--bdr);
-  align-items: center; justify-content: space-around; padding: 0 8px;
-}
-.mnav-btn {
-  display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1;
-  text-decoration: none; color: #7a8899; font-size: 11px; font-weight: 500; text-transform: uppercase;
-}
-.mnav-btn.active { color: var(--blue); }
-.mnav-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; }
+/* ── MAIN ── */
+.main { margin-left: 72px; flex: 1; padding: 0 52px 120px; }
 
-/* MAIN */
-.main { margin-left: 72px; flex: 1; padding: 0 52px 120px; max-width: 1500px; }
-.topbar { display: flex; align-items: center; justify-content: space-between; padding: 40px 0 48px; }
+/* ── TOPBAR ── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 40px 0 48px;
+  position: sticky; top: 0;
+  background: linear-gradient(to bottom, var(--bg) 70%, transparent);
+  z-index: 50;
+}
 .tb-section { font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 0.26em; color: var(--dim); margin-bottom: 6px; }
-.tb-title { font-size: 26px; font-weight: 600; color: var(--text); }
+.tb-title { font-size: 26px; font-weight: 600; color: var(--text); letter-spacing: -0.02em; }
+.tb-right { display: flex; align-items: center; gap: 14px; }
+.ava { width: 40px; height: 40px; border-radius: 50%; background: var(--blue); display: grid; place-items: center; font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 0.08em; color: #fff; cursor: pointer; border: 1px solid rgba(79,158,255,0.35); }
 
-.filter-panel { background: var(--card); border: 1px solid var(--bdr); border-radius: 20px; padding: 25px; margin-bottom: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-items: end; }
-.f-input { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--bdr); border-radius: 10px; padding: 10px 15px; color: white; outline: none; font-size: 14px; }
-
-.cotizaciones-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-.c-card {
-  background: var(--card); border: 1px solid var(--bdr); border-radius: 20px; padding: 25px;
-  position: relative; transition: transform 0.2s, border-color 0.2s;
+/* ── STATS ── */
+.stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 32px; }
+.stat-card {
+  background: var(--card); border: 1px solid var(--bdr);
+  border-radius: 16px; padding: 22px 26px;
+  display: flex; align-items: center; gap: 16px;
 }
-.c-card:hover { transform: translateY(-5px); border-color: var(--blue); }
-.c-num { font-family: 'Bebas Neue', sans-serif; font-size: 14px; background: rgba(79,158,255,0.1); color: var(--blue); padding: 4px 10px; border-radius: 6px; }
-.c-total { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: white; }
+.stat-ico { width: 42px; height: 42px; border-radius: 11px; display: grid; place-items: center; flex-shrink: 0; }
+.stat-ico svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 0.02em; line-height: 1; color: var(--text); }
+.stat-lbl { font-size: 13px; color: var(--sub); margin-top: 3px; }
 
-/* RESPONSIVE */
+/* ── FILTERS ── */
+.filters-panel {
+  background: var(--card); border: 1px solid var(--bdr);
+  border-radius: 16px; padding: 20px 24px;
+  display: grid; grid-template-columns: 1fr 180px 180px 180px;
+  gap: 14px; margin-bottom: 32px; align-items: center;
+}
+.filter-input {
+  background: var(--input); border: 1px solid var(--bdr);
+  border-radius: 10px; padding: 13px 16px 13px 44px;
+  color: var(--text); font-family: 'Outfit', sans-serif; font-size: 15px;
+  outline: none; transition: border-color 0.18s, box-shadow 0.18s; width: 100%;
+}
+.filter-input::placeholder { color: var(--dim); }
+.filter-input:focus { border-color: rgba(79,158,255,0.4); box-shadow: 0 0 0 3px rgba(79,158,255,0.07); }
+.filter-wrap { position: relative; }
+.filter-ico { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--dim); pointer-events: none; }
+.filter-ico svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.filter-select {
+  background: var(--input); border: 1px solid var(--bdr);
+  border-radius: 10px; padding: 13px 40px 13px 16px;
+  color: var(--text); font-family: 'Outfit', sans-serif; font-size: 15px;
+  outline: none; transition: border-color 0.18s;
+  appearance: none; -webkit-appearance: none; width: 100%; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a8899' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+}
+.filter-select:focus { border-color: rgba(79,158,255,0.4); }
+.filter-date {
+  background: var(--input); border: 1px solid var(--bdr);
+  border-radius: 10px; padding: 13px 16px;
+  color: var(--text); font-family: 'Outfit', sans-serif; font-size: 15px;
+  outline: none; transition: border-color 0.18s; width: 100%;
+  color-scheme: dark;
+}
+.filter-date:focus { border-color: rgba(79,158,255,0.4); }
+
+/* ── SLABEL ── */
+.slabel { font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 0.28em; color: var(--dim); margin-bottom: 20px; }
+
+/* ── CARDS GRID ── */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.cot-card {
+  background: var(--card); border: 1px solid var(--bdr);
+  border-radius: 18px; padding: 28px;
+  display: flex; flex-direction: column; gap: 0;
+  transition: border-color 0.22s, transform 0.22s cubic-bezier(.22,1,.36,1);
+  animation: cardIn 0.35s ease;
+  position: relative; overflow: hidden;
+}
+@keyframes cardIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+.cot-card:hover { transform: translateY(-4px); border-color: rgba(79,158,255,0.22); }
+.cot-card::before {
+  content: ''; position: absolute; top: 0; left: 20px; right: 20px;
+  height: 1px; background: linear-gradient(90deg, transparent, var(--blue), transparent);
+  opacity: 0; transition: opacity 0.22s;
+}
+.cot-card:hover::before { opacity: 1; }
+
+.card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.card-num {
+  font-family: 'Bebas Neue', sans-serif; font-size: 14px;
+  letter-spacing: 0.1em; color: var(--blue);
+  background: rgba(79,158,255,0.08); padding: 4px 10px; border-radius: 6px;
+}
+.card-badge {
+  font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 5px;
+  display: inline-flex; align-items: center; gap: 5px; letter-spacing: 0.04em;
+}
+.badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.cb-g { background: rgba(0,229,160,0.08); color: var(--green); }
+.cb-a { background: rgba(245,166,35,0.08); color: var(--amber); }
+.cb-b { background: rgba(79,158,255,0.08); color: var(--blue); }
+.cb-r { background: rgba(255,77,106,0.08); color: var(--red); }
+
+.card-cliente { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.card-fecha { font-size: 13px; color: var(--sub); margin-bottom: 20px; }
+.card-monto {
+  font-family: 'Bebas Neue', sans-serif; font-size: 34px;
+  letter-spacing: 0.01em; line-height: 1; color: var(--text);
+  margin-bottom: 24px;
+}
+
+.card-rule { height: 1px; background: var(--bdr2); margin-bottom: 20px; }
+
+.card-actions { display: flex; align-items: center; gap: 10px; }
+.btn-pdf {
+  display: flex; align-items: center; gap: 7px;
+  background: rgba(255,77,106,0.07); border: 1px solid rgba(255,77,106,0.16);
+  border-radius: 9px; padding: 10px 16px;
+  color: var(--red); font-family: 'Bebas Neue', sans-serif;
+  font-size: 12px; letter-spacing: 0.12em;
+  text-decoration: none; transition: background 0.15s;
+}
+.btn-pdf:hover { background: rgba(255,77,106,0.14); }
+.btn-pdf svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+.btn-excel {
+  display: flex; align-items: center; gap: 7px;
+  background: rgba(0,229,160,0.07); border: 1px solid rgba(0,229,160,0.16);
+  border-radius: 9px; padding: 10px 16px;
+  color: var(--green); font-family: 'Bebas Neue', sans-serif;
+  font-size: 12px; letter-spacing: 0.12em;
+  text-decoration: none; transition: background 0.15s;
+}
+.btn-excel:hover { background: rgba(0,229,160,0.14); }
+.btn-excel svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+.btn-edit {
+  margin-left: auto;
+  width: 38px; height: 38px; border-radius: 9px;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--bdr);
+  color: var(--sub); cursor: pointer; display: grid; place-items: center;
+  transition: background 0.15s, color 0.15s;
+  text-decoration: none;
+}
+.btn-edit:hover { background: rgba(255,255,255,0.09); color: var(--text); }
+.btn-edit svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Empty */
+.empty-state {
+  grid-column: 1 / -1; padding: 80px 32px; text-align: center;
+}
+.empty-ico { width: 60px; height: 60px; border-radius: 16px; background: rgba(79,158,255,0.07); display: grid; place-items: center; margin: 0 auto 20px; }
+.empty-ico svg { width: 28px; height: 28px; fill: none; stroke: var(--blue); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.empty-title { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+.empty-sub { font-size: 14px; color: var(--sub); }
+
+/* ── LOADER ── */
+.loader { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; }
+.loader-name { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.32em; color: var(--sub); }
+.loader-bar { width: 130px; height: 1px; background: var(--bdr); overflow: hidden; }
+.loader-fill { height: 100%; background: var(--blue); width: 0; animation: lp 1.4s ease forwards; }
+@keyframes lp { to { width: 100%; } }
+
+/* ── MOBILE NAV ── */
+.mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 68px; z-index: 200; background: rgba(8,11,18,0.97); backdrop-filter: blur(24px); border-top: 1px solid var(--bdr); align-items: center; justify-content: space-around; padding: 0 8px; }
+.mnav-btn { display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; text-decoration: none; color: var(--dim); font-size: 11px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; padding: 8px 4px; transition: color 0.15s; }
+.mnav-btn.active { color: var(--blue); }
+.mnav-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 2px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1200px) {
+  .cards-grid { grid-template-columns: repeat(2,1fr); }
+  .stats-row { grid-template-columns: repeat(2,1fr); }
+}
+@media (max-width: 900px) {
+  .filters-panel { grid-template-columns: 1fr 1fr; }
+}
 @media (max-width: 768px) {
   .sidebar { display: none; }
   .mobile-nav { display: flex; }
-  .main { margin-left: 0; padding: 20px 15px 100px; }
-  .topbar { padding: 30px 0; }
+  .main { margin-left: 0; padding: 0 18px 80px; }
+  .topbar { padding: 24px 0 28px; }
   .tb-title { font-size: 22px; }
-  .filter-panel { grid-template-columns: 1fr; padding: 15px; }
-  .cotizaciones-grid { grid-template-columns: 1fr; }
+  .stats-row { grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+  .filters-panel { grid-template-columns: 1fr; padding: 18px; gap: 12px; margin-bottom: 24px; }
+  .cards-grid { grid-template-columns: 1fr; gap: 14px; }
+}
+@media (max-width: 480px) {
+  .main { padding: 0 14px 80px; }
+  .stats-row { grid-template-columns: 1fr; }
+  .cot-card { padding: 22px; }
+  .card-monto { font-size: 28px; }
 }
 </style>
 </head>
 <body>
 
-<canvas id="bg-canvas"></canvas>
+<div class="loader" id="loader">
+  <div class="loader-name">BlueSky Energy</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+</div>
 
 <div class="shell">
+  <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sb-logo">
-      <img src="{{ url_for('static', filename='img/logo 1.2.png') }}" alt="Logo" style="height: 32px;">
+      <div class="sb-mark">
+        <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
       <span class="sb-name">BlueSky Energy</span>
     </div>
     <nav class="nav-group">
       <a href="/dashboard" class="nav-link">
-        <span class="nav-ico"><svg viewBox="0 0 24 24" style="width:20px; stroke:currentColor; stroke-width:1.8; fill:none;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
         <span class="nav-txt">Dashboard</span>
       </a>
       <a href="/" class="nav-link">
-        <span class="nav-ico"><svg viewBox="0 0 24 24" style="width:20px; stroke:currentColor; stroke-width:1.8; fill:none;"><path d="M12 5v14M5 12h14"/></svg></span>
-        <span class="nav-txt">Nueva</span>
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+        <span class="nav-txt">Nueva Cotización</span>
       </a>
       <a href="/cotizaciones" class="nav-link active">
-        <span class="nav-ico"><svg viewBox="0 0 24 24" style="width:20px; stroke:currentColor; stroke-width:1.8; fill:none;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
         <span class="nav-txt">Cotizaciones</span>
       </a>
       <a href="/clientes" class="nav-link">
-        <span class="nav-ico"><svg viewBox="0 0 24 24" style="width:20px; stroke:currentColor; stroke-width:1.8; fill:none;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
         <span class="nav-txt">Clientes</span>
       </a>
     </nav>
+    <div class="sb-gap"></div>
   </aside>
 
-  <nav class="mobile-nav">
-    <a href="/dashboard" class="mnav-btn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Panel</span></a>
-    <a href="/" class="mnav-btn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Nueva</span></a>
-    <a href="/cotizaciones" class="mnav-btn active"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg><span>Listado</span></a>
-    <a href="/clientes" class="mnav-btn"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>Clientes</span></a>
-  </nav>
-
   <main class="main">
+    <!-- TOPBAR -->
     <div class="topbar">
       <div>
-        <div class="tb-section">Sistema / Documentos</div>
-        <div class="tb-title">Historial Guardado</div>
+        <div class="tb-section">Sistema de Gestión / Documentos</div>
+        <div class="tb-title">Historial de Cotizaciones</div>
+      </div>
+      <div class="tb-right">
+        <div class="ava">BE</div>
       </div>
     </div>
 
-    <div class="filter-panel">
-      <input type="text" class="f-input" id="search-input" placeholder="Buscar por cliente o número...">
-      <input type="date" class="f-input" id="fecha-desde">
-      <input type="date" class="f-input" id="fecha-hasta">
-      <select class="f-input" id="filter-estado">
+    <!-- STATS -->
+    <div class="stats-row" id="stats-row">
+      <div class="stat-card">
+        <div class="stat-ico" style="background:rgba(79,158,255,0.1);color:var(--blue)">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div>
+          <div class="stat-val" id="st-total">—</div>
+          <div class="stat-lbl">Total emitidas</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-ico" style="background:rgba(0,229,160,0.1);color:var(--green)">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div>
+          <div class="stat-val" id="st-apr">—</div>
+          <div class="stat-lbl">Aprobadas</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-ico" style="background:rgba(245,166,35,0.1);color:var(--amber)">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div>
+          <div class="stat-val" id="st-pen">—</div>
+          <div class="stat-lbl">Pendientes</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-ico" style="background:rgba(0,212,255,0.1);color:var(--cyan)">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div>
+          <div class="stat-val" id="st-monto">—</div>
+          <div class="stat-lbl">Monto total</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filters-panel" id="filters-panel">
+      <div class="filter-wrap">
+        <div class="filter-ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+        <input type="text" class="filter-input" id="f-search" placeholder="Buscar por cliente o número…">
+      </div>
+      <input type="date" class="filter-date" id="f-desde" title="Desde">
+      <input type="date" class="filter-date" id="f-hasta" title="Hasta">
+      <select class="filter-select" id="f-estado">
         <option value="">Todos los estados</option>
-        <option value="Pendiente">Pendiente</option>
         <option value="Aprobada">Aprobada</option>
+        <option value="Pendiente">Pendiente</option>
+        <option value="En Revisión">En Revisión</option>
+        <option value="Rechazada">Rechazada</option>
       </select>
     </div>
 
-    <div id="loading" style="text-align:center; padding:50px; color:var(--sub);">Accediendo al servidor...</div>
-    <div id="cotizaciones-container" class="cotizaciones-grid"></div>
+    <!-- GRID -->
+    <div class="slabel" id="results-label">Todos los documentos</div>
+    <div class="cards-grid" id="cards-grid">
+      <div class="empty-state">
+        <div class="empty-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div class="empty-title">Cargando cotizaciones…</div>
+        <div class="empty-sub">Un momento por favor</div>
+      </div>
+    </div>
   </main>
 </div>
 
-<script>
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), alpha: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-const group = new THREE.Group(); scene.add(group);
-const count = 60; const pos = new Float32Array(count*3);
-for(let i=0; i<count*3; i++) pos[i] = (Math.random()-0.5)*10;
-const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-group.add(new THREE.Points(geo, new THREE.PointsMaterial({size: 0.08, color: '#4f9eff'})));
-camera.position.z = 5;
-function anim() { requestAnimationFrame(anim); group.rotation.y += 0.001; renderer.render(scene, camera); } anim();
+<!-- MOBILE NAV -->
+<nav class="mobile-nav">
+  <a href="/dashboard" class="mnav-btn">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Panel
+  </a>
+  <a href="/" class="mnav-btn">
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nueva
+  </a>
+  <a href="/cotizaciones" class="mnav-btn active">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Cotizaciones
+  </a>
+  <a href="/clientes" class="mnav-btn">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Clientes
+  </a>
+</nav>
 
-let todasLasCotizaciones = [];
-function cargarData() {
-  fetch('/api/cotizaciones').then(r => r.json()).then(data => {
-    if (data.status === 'ok') { 
-      todasLasCotizaciones = data.cotizaciones; 
-      render(todasLasCotizaciones); 
-      document.getElementById('loading').style.display = 'none';
-    }
+<canvas id="bg-canvas"></canvas>
+
+<script>
+// ── THREE.JS ──
+(function(){
+  const c=document.getElementById('bg-canvas');
+  const r=new THREE.WebGLRenderer({canvas:c,alpha:true,antialias:true});
+  r.setPixelRatio(Math.min(devicePixelRatio,2));
+  r.setSize(innerWidth,innerHeight);
+  const scene=new THREE.Scene();
+  const cam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,0.1,100);
+  cam.position.z=5;
+  const N=1200,pos=new Float32Array(N*3),col=new Float32Array(N*3);
+  const pal=[new THREE.Color('#4f9eff'),new THREE.Color('#00e5a0'),new THREE.Color('#00d4ff'),new THREE.Color('#f5a623')];
+  for(let i=0;i<N;i++){
+    pos[i*3]=(Math.random()-.5)*24;pos[i*3+1]=(Math.random()-.5)*24;pos[i*3+2]=(Math.random()-.5)*10;
+    const cl=pal[Math.floor(Math.random()*4)];col[i*3]=cl.r;col[i*3+1]=cl.g;col[i*3+2]=cl.b;
+  }
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('color',new THREE.BufferAttribute(col,3));
+  const pts=new THREE.Points(geo,new THREE.PointsMaterial({size:0.055,vertexColors:true,transparent:true,opacity:0.85}));
+  scene.add(pts);
+  const lm=new THREE.LineBasicMaterial({color:0x0f1e35,transparent:true,opacity:0.45});
+  for(let i=-10;i<=10;i+=2){
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-14,i*.75,-2),new THREE.Vector3(14,i*.75,-2)]),lm));
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(i,-10,-2),new THREE.Vector3(i,10,-2)]),lm));
+  }
+  const mk=(g,m)=>new THREE.Mesh(g,m);
+  const r1=mk(new THREE.RingGeometry(2.5,2.52,80),new THREE.MeshBasicMaterial({color:0x4f9eff,side:THREE.DoubleSide,transparent:true,opacity:0.14}));
+  const r2=mk(new THREE.RingGeometry(4.0,4.02,80),new THREE.MeshBasicMaterial({color:0x00e5a0,side:THREE.DoubleSide,transparent:true,opacity:0.09}));
+  r1.rotation.x=Math.PI/3;r2.rotation.x=Math.PI/4;r2.rotation.y=Math.PI/6;
+  scene.add(r1);scene.add(r2);
+  let mx=0,my=0;
+  addEventListener('mousemove',e=>{mx=(e.clientX/innerWidth-.5)*.5;my=-(e.clientY/innerHeight-.5)*.5;});
+  addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();r.setSize(innerWidth,innerHeight);});
+  let t=0;
+  (function tick(){requestAnimationFrame(tick);t+=.003;pts.rotation.y=t*.06+mx*.8;pts.rotation.x=my*.4;r1.rotation.z=t*.2;r2.rotation.z=-t*.12;r1.rotation.y=t*.08;cam.position.x+=(mx*.6-cam.position.x)*.04;cam.position.y+=(my*.6-cam.position.y)*.04;r.render(scene,cam);})();
+})();
+
+// ── GSAP ──
+window.addEventListener('load',()=>{
+  gsap.to('#loader',{opacity:0,duration:.5,delay:1.2,onComplete:()=>document.getElementById('loader').style.display='none'});
+  gsap.from('.topbar',{y:-14,opacity:0,duration:.55,delay:1.35,ease:'power3.out'});
+  gsap.from('.stat-card',{y:20,opacity:0,duration:.5,stagger:.07,delay:1.5,ease:'power3.out'});
+  gsap.from('#filters-panel',{y:16,opacity:0,duration:.45,delay:1.7,ease:'power3.out'});
+  gsap.from('#cards-grid',{y:20,opacity:0,duration:.5,delay:1.85,ease:'power3.out',onComplete:cargarCotizaciones});
+});
+
+// ── HELPERS ──
+function money(n){
+  const num=typeof n==='string'?parseFloat(n.replace(/[$,]/g,''))||0:n||0;
+  return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2}).format(num);
+}
+function animN(id,end,fmt){
+  let o={v:0};
+  gsap.to(o,{v:end,duration:1.6,ease:'power2.out',onUpdate:()=>{const el=document.getElementById(id);if(el)el.textContent=fmt(o.v);}});
+}
+
+const EST_CLS={'Aprobada':'cb-g','Pendiente':'cb-a','En Revisión':'cb-b','Rechazada':'cb-r'};
+
+// ── DATOS ──
+let todasCots=[];
+
+async function cargarCotizaciones(){
+  try{
+    const res=await fetch('/api/cotizaciones').then(r=>r.json());
+    if(res.status!=='ok') return;
+    todasCots=(res.cotizaciones||[]).sort((a,b)=>(b.quote_number||0)-(a.quote_number||0));
+    actualizarStats();
+    renderCards(todasCots);
+  }catch(e){console.error(e);}
+}
+
+function actualizarStats(){
+  const total=todasCots.length;
+  const apr=todasCots.filter(c=>c.estado==='Aprobada').length;
+  const pen=todasCots.filter(c=>c.estado==='Pendiente').length;
+  const monto=todasCots.reduce((s,c)=>{
+    const v=typeof c.total==='string'?parseFloat(c.total.replace(/[$,]/g,''))||0:c.total||0;
+    return s+v;
+  },0);
+  animN('st-total',total,n=>Math.round(n));
+  animN('st-apr',apr,n=>Math.round(n));
+  animN('st-pen',pen,n=>Math.round(n));
+  animN('st-monto',monto,n=>{
+    if(n>=1000000) return '$'+(n/1000000).toFixed(1)+'M';
+    if(n>=1000) return '$'+(n/1000).toFixed(0)+'K';
+    return money(n);
   });
 }
-function render(list) {
-  const container = document.getElementById('cotizaciones-container');
-  container.innerHTML = '';
-  list.forEach(c => {
-    container.innerHTML += `
-      <div class="c-card">
-        <div class="c-head">
-          <span class="c-num">#${String(c.quote_number).padStart(3, '0')}</span>
-          <span style="font-size:10px; text-transform:uppercase; color:var(--blue); font-weight:700;">${c.estado}</span>
-        </div>
-        <div style="font-size:18px; font-weight:600; margin-bottom:5px;">${c.cliente}</div>
-        <div style="font-size:13px; color:var(--sub); margin-bottom:15px;">${c.fecha}</div>
-        <div class="c-total">${c.total}</div>
-        <div style="margin-top:20px; display:flex; gap:10px;">
-          <a href="/descargar-pdf/${c.id}" class="btn-main" target="_blank" style="padding:8px 15px; font-size:12px; text-decoration:none; text-align:center;">PDF</a>
-          <button onclick="duplicar('${c.id}')" style="background:rgba(255,255,255,0.05); border:1px solid var(--bdr); color:white; border-radius:10px; padding:0 15px; cursor:pointer;">📑</button>
-        </div>
+
+function renderCards(lista){
+  const grid=document.getElementById('cards-grid');
+  const label=document.getElementById('results-label');
+  label.textContent=lista.length===todasCots.length
+    ? 'Todos los documentos'
+    : `${lista.length} resultado${lista.length!==1?'s':''}`;
+
+  if(!lista.length){
+    grid.innerHTML=`
+      <div class="empty-state">
+        <div class="empty-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div class="empty-title">Sin resultados</div>
+        <div class="empty-sub">Intenta con otros filtros</div>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML='';
+  lista.forEach((q,i)=>{
+    const num=String(q.quote_number||'—').padStart(3,'0');
+    const e=q.estado||'Pendiente';
+    const cls=EST_CLS[e]||'cb-a';
+    const card=document.createElement('div');
+    card.className='cot-card';
+    card.style.animationDelay=(i*0.04)+'s';
+    card.innerHTML=`
+      <div class="card-top">
+        <span class="card-num">#${num}</span>
+        <span class="card-badge ${cls}"><span class="badge-dot"></span>${e}</span>
       </div>
-    `;
+      <div class="card-cliente">${q.cliente||'—'}</div>
+      <div class="card-fecha">${q.fecha||'—'}</div>
+      <div class="card-monto">${typeof q.total==='string'&&q.total.startsWith('$')?q.total:money(q.total)}</div>
+      <div class="card-rule"></div>
+      <div class="card-actions">
+        <a href="/descargar-pdf/${q.id}" class="btn-pdf" target="_blank">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          PDF
+        </a>
+        <a href="/descargar-excel/${q.id}" class="btn-excel" target="_blank">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          Excel
+        </a>
+        <a href="/cotizacion/${q.id}/editar" class="btn-edit" title="Editar">
+          <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </a>
+      </div>`;
+    grid.appendChild(card);
   });
 }
-function duplicar(id) { fetch('/api/cotizaciones/'+id+'/duplicar', {method:'POST'}).then(() => cargarData()); }
-document.getElementById('search-input').oninput = apply;
-document.getElementById('fecha-desde').onchange = apply;
-document.getElementById('fecha-hasta').onchange = apply;
-document.getElementById('filter-estado').onchange = apply;
-function apply() {
-  const s = document.getElementById('search-input').value.toLowerCase();
-  const d = document.getElementById('fecha-desde').value;
-  const h = document.getElementById('fecha-hasta').value;
-  const e = document.getElementById('filter-estado').value;
-  const f = todasLasCotizaciones.filter(c => {
-    const mS = c.cliente.toLowerCase().includes(s) || String(c.quote_number).includes(s);
-    const mD = d ? c.fecha >= d : true;
-    const mH = h ? c.fecha <= h : true;
-    const mE = e ? c.estado === e : true;
-    return mS && mD && mH && mE;
+
+// ── FILTROS ──
+function aplicarFiltros(){
+  const q=document.getElementById('f-search').value.toLowerCase();
+  const desde=document.getElementById('f-desde').value;
+  const hasta=document.getElementById('f-hasta').value;
+  const estado=document.getElementById('f-estado').value;
+
+  const filtradas=todasCots.filter(c=>{
+    const num=String(c.quote_number||'').padStart(3,'0');
+    const matchQ=!q||(c.cliente||'').toLowerCase().includes(q)||num.includes(q);
+    const fecha=c.fecha||'';
+    const matchDesde=!desde||fecha>=desde;
+    const matchHasta=!hasta||fecha<=hasta;
+    const matchEst=!estado||c.estado===estado;
+    return matchQ&&matchDesde&&matchHasta&&matchEst;
   });
-  render(f);
+  renderCards(filtradas);
 }
-cargarData();
-window.onresize = () => { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); };
+
+['f-search','f-desde','f-hasta','f-estado'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',aplicarFiltros);
+  document.getElementById(id).addEventListener('change',aplicarFiltros);
+});
 </script>
 </body>
 </html>

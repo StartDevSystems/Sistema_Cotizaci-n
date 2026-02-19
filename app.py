@@ -227,7 +227,7 @@ def duplicar_cotizacion(cotizacion_id):
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-# === ESTADÍSTICAS (COMPLETO PARA GRÁFICAS) ===
+# === ESTADÍSTICAS ===
 @app.route('/api/estadisticas', methods=['GET'])
 def obtener_estadisticas():
     try:
@@ -239,16 +239,13 @@ def obtener_estadisticas():
         
         for doc in docs:
             data = doc.to_dict()
-            # Calcular monto
             monto = float(data.get('total', '$0.00').replace('$', '').replace(',', ''))
             monto_total += monto
-            # Por estado
             est = data.get('estado', 'Pendiente')
             por_estado[est] = por_estado.get(est, 0) + 1
-            # Por mes
             fecha = data.get('fecha', '')
             if fecha:
-                mes = fecha[:7] # YYYY-MM
+                mes = fecha[:7]
                 por_mes[mes] = por_mes.get(mes, 0) + 1
         
         return jsonify({
@@ -271,15 +268,15 @@ def descargar_pdf(cotizacion_id):
         fecha_obj = datetime.datetime.strptime(data.get('fecha', ''), '%Y-%m-%d')
         data['fecha_formateada'] = format_spanish_date(fecha_obj)
         data['fecha_validez'] = format_spanish_date(fecha_obj + datetime.timedelta(days=15))
-        
-        # Ruta corregida para el nuevo logo PNG
-        logo_path = os.path.join(os.getcwd(), 'static', 'img', 'logo 1.2.png')
+
+        # ── LOGO: usa logo.jpg ──
+        logo_path = os.path.join(os.getcwd(), 'static', 'img', 'logo.jpg')
         if os.path.exists(logo_path):
             data['logo_url'] = Path(logo_path).as_uri()
         else:
             logger.warning(f"No se encontró el logo en: {logo_path}")
             data['logo_url'] = ""
-        
+
         pdf = HTML(string=render_template('cotizacion_pdf.html', **data)).write_pdf()
         res = make_response(pdf)
         res.headers['Content-Type'] = 'application/pdf'
@@ -296,7 +293,6 @@ def descargar_excel(cotizacion_id):
         ws = wb.active
         ws.title = "Cotización"
         
-        # Diseño básico de Excel
         header_fill = PatternFill(start_color="0D2A42", end_color="0D2A42", fill_type="solid")
         header_font = Font(bold=True, color="FFFFFF")
         

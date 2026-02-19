@@ -1,106 +1,403 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Cotización - {{ "%03d"|format(quote_number) }}</title>
-    <style>
-        @page {
-            size: A4;
-            margin: 0.5cm 1cm 1cm 1cm;
-            @bottom-center {
-                content: "Gracias por su confianza. | Contactos: 809-902-3650 / 849-753-5599";
-                font-family: 'Helvetica', 'Arial', sans-serif;
-                font-size: 9pt;
-                color: #555;
-                border-top: 1px solid #ccc;
-                padding-top: 5px;
-                width: 100%;
-            }
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #333; font-size: 11pt; line-height: 1.4; }
-        .header-modern { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px 0; border-bottom: 3px solid #0d2a42; }
-        .logo-section { flex: 1; }
-        .logo-section img { max-width: 180px; height: auto; margin-bottom: 8px; }
-        .company-info { font-size: 9pt; color: #666; line-height: 1.3; }
-        .company-info .company-name { font-weight: bold; color: #0d2a42; font-size: 11pt; }
-        .quote-info-compact { text-align: right; background: linear-gradient(135deg, #0d2a42, #2cb0e8); color: white; padding: 15px 20px; border-radius: 8px; min-width: 280px; }
-        .quote-info-compact h1 { font-size: 22pt; margin-bottom: 8px; font-weight: bold; }
-        .quote-info-compact .detail-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 10pt; }
-        .quote-info-compact .detail-row:last-child { margin-bottom: 0; }
-        .client-info { background-color: #f8f9fa; padding: 12px 15px; margin-bottom: 20px; border-left: 4px solid #2cb0e8; border-radius: 0 5px 5px 0; }
-        .client-info .client-name { font-size: 14pt; font-weight: bold; color: #0d2a42; }
-        .client-info .client-label { font-size: 9pt; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
-        .items-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
-        .items-table th { background: linear-gradient(135deg, #0d2a42, #1a3a5c); color: white; padding: 12px 8px; text-align: center; font-weight: bold; font-size: 10pt; text-transform: uppercase; letter-spacing: 0.5px; }
-        .items-table td { padding: 10px 8px; border-bottom: 1px solid #eee; }
-        .items-table tbody tr:nth-child(even) { background-color: #f8f9fa; }
-        .items-table tbody tr:hover { background-color: #e3f2fd; }
-        .items-table td.qty, .items-table td.price, .items-table td.total { text-align: right; font-weight: 500; }
-        .total-modern { display: flex; justify-content: flex-end; margin-top: 15px; }
-        .total-box { background: linear-gradient(135deg, #0d2a42, #2cb0e8); color: white; padding: 15px 25px; border-radius: 8px; text-align: center; box-shadow: 0 4px 12px rgba(13, 42, 66, 0.3); }
-        .total-box .total-label { font-size: 11pt; margin-bottom: 5px; opacity: 0.9; }
-        .total-box .total-amount { font-size: 18pt; font-weight: bold; }
-        .text-bold { font-weight: bold; }
-        .text-right { text-align: right; }
-    </style>
+<meta charset="UTF-8">
+<title>Cotización — {{ "%03d"|format(quote_number) }}</title>
+<style>
+@page {
+  size: A4;
+  margin: 0;
+  @bottom-center {
+    content: none;
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  color: #1a2233;
+  font-size: 10pt;
+  line-height: 1.5;
+  background: #ffffff;
+}
+
+/* ── PÁGINA COMPLETA ── */
+.page {
+  width: 210mm;
+  min-height: 297mm;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* ── FRANJA SUPERIOR AZUL ── */
+.top-bar {
+  background: #0b1e38;
+  height: 6px;
+  width: 100%;
+}
+
+/* ── HEADER ── */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 28px 36px 24px;
+  border-bottom: 1px solid #e8ecf2;
+}
+
+.logo-block img {
+  max-width: 160px;
+  height: auto;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.company-details {
+  font-size: 8.5pt;
+  color: #6b7a94;
+  line-height: 1.6;
+}
+.company-details .company-name {
+  font-size: 11pt;
+  font-weight: 700;
+  color: #0b1e38;
+  margin-bottom: 4px;
+  letter-spacing: -0.2px;
+}
+
+/* Caja de número de cotización */
+.quote-badge {
+  text-align: right;
+}
+.quote-badge .quote-label {
+  font-size: 8pt;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: #6b7a94;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.quote-badge .quote-number {
+  font-size: 32pt;
+  font-weight: 900;
+  color: #0b1e38;
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 14px;
+}
+.quote-badge .quote-number span {
+  font-size: 16pt;
+  color: #3b8fd9;
+  font-weight: 700;
+}
+
+.meta-pills {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-end;
+}
+.meta-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 8.5pt;
+}
+.meta-pill .pill-label {
+  color: #8a96aa;
+  font-weight: 500;
+}
+.meta-pill .pill-val {
+  color: #1a2233;
+  font-weight: 600;
+  background: #f0f4fa;
+  padding: 3px 10px;
+  border-radius: 4px;
+}
+.pill-val.estado-aprobada { background: #e6faf3; color: #00875a; }
+.pill-val.estado-pendiente { background: #fff8e6; color: #b06b00; }
+.pill-val.estado-revision  { background: #e8f2ff; color: #1a6bcf; }
+.pill-val.estado-rechazada { background: #ffeef1; color: #c0233a; }
+
+/* ── CLIENTE BAND ── */
+.client-band {
+  background: #f6f8fc;
+  border-left: 4px solid #3b8fd9;
+  margin: 0 36px 28px;
+  padding: 14px 18px;
+  border-radius: 0 8px 8px 0;
+}
+.client-band .client-label {
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: #8a96aa;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.client-band .client-name {
+  font-size: 15pt;
+  font-weight: 700;
+  color: #0b1e38;
+  letter-spacing: -0.3px;
+}
+
+/* ── TABLA ── */
+.table-wrap {
+  padding: 0 36px;
+  margin-bottom: 28px;
+  flex: 1;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 9.5pt;
+}
+
+thead tr {
+  background: #0b1e38;
+}
+thead th {
+  color: #ffffff;
+  font-size: 8pt;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 11px 12px;
+  text-align: left;
+}
+thead th.right { text-align: right; }
+thead th.center { text-align: center; }
+
+tbody tr { border-bottom: 1px solid #edf0f7; }
+tbody tr:nth-child(even) { background: #f9fbfe; }
+
+tbody td {
+  padding: 11px 12px;
+  color: #2d3a50;
+  vertical-align: top;
+}
+tbody td.center { text-align: center; }
+tbody td.right  { text-align: right; font-weight: 600; color: #1a2233; }
+tbody td.desc   { font-weight: 500; }
+
+/* Fila vacía si no hay items */
+.empty-row td {
+  text-align: center;
+  color: #aab;
+  font-style: italic;
+  padding: 28px;
+}
+
+/* ── TOTAL ── */
+.total-section {
+  padding: 0 36px 28px;
+  display: flex;
+  justify-content: flex-end;
+}
+.total-box {
+  background: #0b1e38;
+  color: #ffffff;
+  padding: 18px 28px;
+  border-radius: 10px;
+  text-align: center;
+  min-width: 220px;
+}
+.total-box .total-label {
+  font-size: 8pt;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.65;
+  margin-bottom: 6px;
+}
+.total-box .total-amount {
+  font-size: 20pt;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  color: #ffffff;
+}
+.total-box .total-accent {
+  width: 32px; height: 2px;
+  background: #3b8fd9;
+  margin: 8px auto 0;
+  border-radius: 1px;
+}
+
+/* ── NOTAS ── */
+.notes-section {
+  padding: 0 36px 24px;
+}
+.notes-label {
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #8a96aa;
+  margin-bottom: 8px;
+}
+.notes-box {
+  background: #f6f8fc;
+  border: 1px solid #e8ecf2;
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-size: 9pt;
+  color: #4a5568;
+  line-height: 1.6;
+}
+
+/* ── FOOTER ── */
+.footer {
+  margin-top: auto;
+  border-top: 1px solid #e8ecf2;
+  padding: 14px 36px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f9fbfe;
+}
+.footer-left {
+  font-size: 8pt;
+  color: #8a96aa;
+  line-height: 1.5;
+}
+.footer-left strong {
+  color: #0b1e38;
+  font-weight: 700;
+}
+.footer-right {
+  text-align: right;
+}
+.footer-right .footer-num {
+  font-size: 8pt;
+  color: #8a96aa;
+}
+.footer-right .footer-brand {
+  font-size: 9pt;
+  font-weight: 700;
+  color: #0b1e38;
+  letter-spacing: 0.04em;
+}
+
+/* ── BOTTOM ACCENT ── */
+.bottom-bar {
+  background: linear-gradient(90deg, #0b1e38 60%, #3b8fd9 100%);
+  height: 4px;
+  width: 100%;
+}
+</style>
 </head>
 <body>
-    <div class="header-modern">
-        <div class="logo-section">
-            <img src="{{ logo_url }}" alt="BlueSky Energy">
-            <div class="company-info">
-                <div class="company-name">BlueSky Energy</div>
-                <div>Santo Domingo, República Dominicana</div>
-                <div>contacto@blueskyenergy.com</div>
-                <div>809-902-3650 / 849-753-5599</div>
-            </div>
-        </div>
-        <div class="quote-info-compact">
-            <h1>COTIZACIÓN</h1>
-            <div class="detail-row">
-                <span>Nº:</span>
-                <span>{{ "%03d"|format(quote_number) }}</span>
-            </div>
-            <div class="detail-row">
-                <span>Fecha:</span>
-                <span>{{ fecha_formateada }}</span>
-            </div>
-            <div class="detail-row">
-                <span>Válida hasta:</span>
-                <span>{{ fecha_validez }}</span>
-            </div>
-        </div>
+<div class="page">
+
+  <!-- Franja superior -->
+  <div class="top-bar"></div>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-block">
+      <img src="{{ logo_url }}" alt="BlueSky Energy">
+      <div class="company-details">
+        <div class="company-name">BlueSky Energy</div>
+        <div>Santo Domingo, República Dominicana</div>
+        <div>contacto@blueskyenergy.com</div>
+        <div>809-902-3650 / 849-753-5599</div>
+      </div>
     </div>
-    <div class="client-info">
-        <div class="client-label">Cliente</div>
-        <div class="client-name">{{ cliente }}</div>
+
+    <div class="quote-badge">
+      <div class="quote-label">Cotización</div>
+      <div class="quote-number">
+        <span>#</span>{{ "%03d"|format(quote_number) }}
+      </div>
+      <div class="meta-pills">
+        <div class="meta-pill">
+          <span class="pill-label">Fecha</span>
+          <span class="pill-val">{{ fecha_formateada }}</span>
+        </div>
+        <div class="meta-pill">
+          <span class="pill-label">Válida hasta</span>
+          <span class="pill-val">{{ fecha_validez }}</span>
+        </div>
+        <div class="meta-pill">
+          <span class="pill-label">Estado</span>
+          <span class="pill-val estado-{{ estado|lower|replace(' ', '') if estado else 'pendiente' }}">
+            {{ estado if estado else 'Pendiente' }}
+          </span>
+        </div>
+      </div>
     </div>
-    <table class="items-table">
-        <thead>
-            <tr>
-                <th style="width: 55%;">Descripción</th>
-                <th style="width: 15%;">Cantidad</th>
-                <th style="width: 15%;">Precio Unit.</th>
-                <th style="width: 15%;">Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in items %}
-            <tr>
-                <td>{{ item.descripcion }}</td>
-                <td class="qty">{{ item.cantidad }}</td>
-                <td class="price">${{ "{:,.2f}".format(item.precio) }}</td>
-                <td class="total">${{ "{:,.2f}".format(item.cantidad * item.precio) }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
+  </div>
+
+  <!-- CLIENTE -->
+  <div class="client-band">
+    <div class="client-label">Preparado para</div>
+    <div class="client-name">{{ cliente }}</div>
+  </div>
+
+  <!-- TABLA -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:55%">Descripción del Servicio</th>
+          <th style="width:12%" class="center">Cant.</th>
+          <th style="width:16%" class="right">Precio Unit.</th>
+          <th style="width:17%" class="right">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if items %}
+          {% for item in items %}
+          <tr>
+            <td class="desc">{{ item.descripcion }}</td>
+            <td class="center">{{ item.cantidad }}</td>
+            <td class="right">${{ "{:,.2f}".format(item.precio) }}</td>
+            <td class="right">${{ "{:,.2f}".format(item.cantidad * item.precio) }}</td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr class="empty-row"><td colspan="4">Sin servicios registrados</td></tr>
+        {% endif %}
+      </tbody>
     </table>
-    <div class="total-modern">
-        <div class="total-box">
-            <div class="total-label">Total General</div>
-            <div class="total-amount">{{ total }}</div>
-        </div>
+  </div>
+
+  <!-- TOTAL -->
+  <div class="total-section">
+    <div class="total-box">
+      <div class="total-label">Total General</div>
+      <div class="total-amount">{{ total }}</div>
+      <div class="total-accent"></div>
     </div>
+  </div>
+
+  <!-- NOTAS -->
+  {% if notas %}
+  <div class="notes-section">
+    <div class="notes-label">Notas y Condiciones</div>
+    <div class="notes-box">{{ notas }}</div>
+  </div>
+  {% endif %}
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-left">
+      <strong>Gracias por su confianza.</strong><br>
+      Para consultas: 809-902-3650 / 849-753-5599 &nbsp;·&nbsp; contacto@blueskyenergy.com
+    </div>
+    <div class="footer-right">
+      <div class="footer-brand">BlueSky Energy</div>
+      <div class="footer-num">Cotización #{{ "%03d"|format(quote_number) }}</div>
+    </div>
+  </div>
+
+  <!-- Franja inferior -->
+  <div class="bottom-bar"></div>
+
+</div>
 </body>
 </html>
