@@ -3,15 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nueva Cotización - BlueSky Energy</title>
+    <title>BlueSky Energy — Nueva Cotización</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo 1.2.png') }}">
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
@@ -29,7 +26,7 @@
             background: var(--bg) !important;
             color: #ffffff !important;
             font-family: 'Outfit', sans-serif;
-            font-size: 20px;
+            font-size: 18px;
             margin: 0;
             overflow-x: hidden;
             min-height: 100vh;
@@ -37,9 +34,9 @@
         }
 
         #three-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.4; }
-
         .shell { position: relative; z-index: 2; display: flex; min-height: 100vh; }
 
+        /* SIDEBAR */
         .sidebar {
             width: 72px; position: fixed; left: 0; top: 0; bottom: 0;
             background: rgba(8,11,18,0.98); backdrop-filter: blur(30px);
@@ -61,10 +58,26 @@
         .nav-ico { width: 28px; display: grid; place-items: center; }
         .nav-ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; }
 
+        /* MOBILE NAV */
+        .mobile-nav {
+            display: none; position: fixed; bottom: 0; left: 0; right: 0;
+            height: 68px; z-index: 200;
+            background: rgba(8,11,18,0.97); backdrop-filter: blur(24px);
+            border-top: 1px solid var(--bdr);
+            align-items: center; justify-content: space-around; padding: 0 8px;
+        }
+        .mnav-btn {
+            display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1;
+            text-decoration: none; color: #7a8899; font-size: 11px; font-weight: 500; text-transform: uppercase;
+        }
+        .mnav-btn.active { color: var(--blue); }
+        .mnav-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; }
+
+        /* MAIN CONTENT */
         .main-content { 
             flex: 1; 
             margin-left: 72px; 
-            padding: 60px 20px; 
+            padding: 40px; 
             display: flex;
             justify-content: center;
             align-items: flex-start;
@@ -75,7 +88,7 @@
             backdrop-filter: blur(25px);
             border: 1px solid var(--bdr);
             border-radius: 24px;
-            padding: 50px;
+            padding: 40px;
             width: 100%;
             max-width: 1200px;
             box-shadow: 0 25px 50px rgba(0,0,0,0.6);
@@ -83,60 +96,30 @@
 
         .section-title { font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 0.05em; color: var(--blue); margin-bottom: 30px; }
 
-        /* 🚨 TOTAL ANNIHILATION OF WHITE INPUTS 🚨 */
         input, textarea, select, .form-control, .form-select {
-            background-color: #121520 !important; /* COLOR SÓLIDO OSCURO */
+            background-color: #121520 !important;
             border: 1px solid var(--bdr) !important;
             color: #ffffff !important;
             border-radius: 12px !important;
             padding: 18px 24px !important;
             font-size: 18px !important;
-            transition: all 0.3s ease !important;
         }
 
-        .form-label { 
-            font-size: 14px !important;
-            font-weight: 700 !important;
-            text-transform: uppercase !important; 
-            letter-spacing: 1.5px !important; 
-            color: var(--blue) !important;
-            margin-bottom: 12px !important; 
-            display: block;
-        }
-
-        ::placeholder { color: rgba(255, 255, 255, 0.6) !important; } /* MÁS CLARO */
-
-        select option {
-            background-color: #0e1520 !important;
-            color: white !important;
-        }
-
-        .table { color: var(--text) !important; border-collapse: separate; border-spacing: 0 15px; }
-        .table thead th { 
-            font-family: 'Bebas Neue', sans-serif; 
-            color: var(--blue); 
-            border: none;
-            background: transparent !important;
-            letter-spacing: 1.5px;
-            font-size: 20px;
-        }
-        .table td { border: none !important; vertical-align: middle; }
-        
-        .btn-premium {
-            background: var(--blue) !important;
-            border: none; color: #fff !important; font-weight: 800; border-radius: 15px; padding: 20px 40px; transition: 0.4s;
-            text-transform: uppercase; letter-spacing: 2px; font-size: 18px;
-        }
-        .btn-premium:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(79, 158, 255, 0.4); }
-
+        .form-label { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--blue) !important; margin-bottom: 12px; display: block; }
         .total-display { font-family: 'Bebas Neue', sans-serif; font-size: 82px; color: white; line-height: 1; }
 
-        .autocomplete-items {
-            background: #0e1520; border: 2px solid var(--blue); border-radius: 15px;
-            position: absolute; width: 100%; z-index: 1000; overflow: hidden;
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .mobile-nav { display: flex; }
+            .main-content { margin-left: 0; padding: 20px 15px 100px; }
+            .premium-card { padding: 25px 15px; border-radius: 16px; }
+            .section-title { font-size: 32px; }
+            .total-display { font-size: 54px; text-align: center; }
+            .total-lbl { text-align: center; }
+            .row > div { margin-bottom: 15px; }
+            .btn-premium { width: 100%; padding: 15px; }
         }
-        .autocomplete-items div { padding: 18px; cursor: pointer; color: #fff; border-bottom: 1px solid var(--bdr); font-size: 18px; }
-        .autocomplete-items div:hover { background: var(--blue); }
     </style>
 </head>
 <body>
@@ -144,6 +127,7 @@
     <canvas id="three-canvas"></canvas>
 
     <div class="shell">
+        <!-- SIDEBAR -->
         <aside class="sidebar">
             <div class="sb-logo">
                 <img src="{{ url_for('static', filename='img/logo 1.2.png') }}" alt="Logo" style="height: 32px;">
@@ -156,7 +140,7 @@
                 </a>
                 <a href="/" class="nav-link active">
                     <span class="nav-ico"><svg viewBox="0 0 24 24" style="stroke:currentColor; stroke-width:1.8; fill:none;"><path d="M12 5v14M5 12h14"/></svg></span>
-                    <span class="sb-name">Nueva Cotización</span>
+                    <span class="sb-name">Nueva</span>
                 </a>
                 <a href="/cotizaciones" class="nav-link">
                     <span class="nav-ico"><svg viewBox="0 0 24 24" style="stroke:currentColor; stroke-width:1.8; fill:none;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
@@ -169,79 +153,88 @@
             </nav>
         </aside>
 
+        <!-- MOBILE NAV -->
+        <nav class="mobile-nav">
+            <a href="/dashboard" class="mnav-btn">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                <span>Panel</span>
+            </a>
+            <a href="/" class="mnav-btn active">
+                <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                <span>Nueva</span>
+            </a>
+            <a href="/cotizaciones" class="mnav-btn">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+                <span>Listado</span>
+            </a>
+            <a href="/clientes" class="mnav-btn">
+                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                <span>Clientes</span>
+            </a>
+        </nav>
+
         <main class="main-content">
             <div class="premium-card">
-                <div class="d-flex justify-content-between align-items-center mb-5">
-                    <h1 class="section-title mb-0">Emisión de Cotización</h1>
-                    <button class="btn btn-outline-info btn-sm px-4 py-2" data-bs-toggle="modal" data-bs-target="#productosModal" style="border-radius: 12px; border-color: var(--bdr); color: white;">
-                        📂 CATÁLOGO
-                    </button>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="section-title mb-0">Emisión</h1>
+                    <button class="btn btn-outline-info btn-sm px-3" data-bs-toggle="modal" data-bs-target="#productosModal">📂 CATÁLOGO</button>
                 </div>
 
                 <form id="cotizacion-form">
-                    <div class="row g-4 mb-5">
+                    <div class="row g-3 mb-4">
                         <div class="col-md-6">
-                            <label class="form-label">Cliente Final</label>
+                            <label class="form-label">Cliente</label>
                             <div class="position-relative">
-                                <input type="text" class="form-control" id="cliente" placeholder="Escribe para buscar..." required autocomplete="off" style="background-color: #121520 !important;">
+                                <input type="text" class="form-control" id="cliente" placeholder="Escribe para buscar..." required autocomplete="off">
                                 <div id="cliente-autocomplete" class="autocomplete-items"></div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Fecha Emisión</label>
-                            <input type="date" class="form-control" id="fecha" required style="background-color: #121520 !important;">
+                        <div class="col-6 col-md-3">
+                            <label class="form-label">Fecha</label>
+                            <input type="date" class="form-control" id="fecha" required>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-6 col-md-3">
                             <label class="form-label">Estado</label>
-                            <select class="form-select" id="estado" style="background-color: #121520 !important;">
+                            <select class="form-select" id="estado">
                                 <option value="Pendiente">Pendiente</option>
                                 <option value="Aprobada">Aprobada</option>
-                                <option value="Rechazada">Rechazada</option>
-                                <option value="En Revisión">En Revisión</option>
                             </select>
                         </div>
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="section-title mb-0" style="font-size: 22px;">Conceptos Detallados</h5>
-                        <button type="button" class="btn btn-sm btn-outline-secondary px-3" id="add-row-btn" style="border-radius: 10px; border-color: var(--bdr); color: #7a8899;">
-                            + AÑADIR FILA
-                        </button>
                     </div>
 
                     <div class="table-responsive mb-4">
                         <table class="table" id="items-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 50%;">DESCRIPCIÓN DEL SERVICIO</th>
-                                    <th style="width: 10%; text-align: center;">CANT.</th>
-                                    <th style="width: 15%;">PRECIO UNIT.</th>
-                                    <th style="width: 15%;">TOTAL</th>
-                                    <th style="width: 5%;"></th>
+                                    <th style="width: 50%;">DETALLE</th>
+                                    <th style="width: 10%;">CANT</th>
+                                    <th style="width: 20%;">PRECIO</th>
+                                    <th style="width: 20%;">TOTAL</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody id="items-tbody"></tbody>
                         </table>
                     </div>
 
-                    <div class="row align-items-end mt-5">
-                        <div class="col-md-7">
-                            <label class="form-label">Notas Adicionales</label>
-                            <textarea class="form-control" id="notas" rows="4" placeholder="Validez de oferta, condiciones..." style="background-color: #121520 !important;"></textarea>
+                    <button type="button" class="btn btn-sm btn-outline-secondary w-100 mb-4" id="add-row-btn">+ AGREGAR LÍNEA</button>
+
+                    <div class="row align-items-end mt-4">
+                        <div class="col-md-7 mb-4">
+                            <label class="form-label">Notas</label>
+                            <textarea class="form-control" id="notas" rows="3" placeholder="Validez, condiciones..."></textarea>
                         </div>
                         <div class="col-md-5 text-end">
-                            <p class="form-label mb-1">INVERSIÓN TOTAL ESTIMADA</p>
+                            <p class="form-label mb-1 total-lbl">VALOR ESTIMADO</p>
                             <div class="total-display" id="total-general">$0.00</div>
                         </div>
                     </div>
 
                     <div class="text-center mt-5">
-                        <button type="submit" class="btn btn-premium btn-lg w-100">
-                            PROCESAR Y GUARDAR COTIZACIÓN
-                        </button>
-                        <div id="download-buttons-area" class="mt-4" style="display: none;">
-                            <a href="#" id="pdf-download-link" class="btn btn-danger btn-lg me-3" target="_blank" style="font-family: 'Bebas Neue'; padding: 15px 40px;">PDF</a>
-                            <a href="#" id="excel-download-link" class="btn btn-success btn-lg" style="font-family: 'Bebas Neue'; padding: 15px 40px;">EXCEL</a>
+                        <button type="submit" class="btn btn-main btn-lg w-100" style="background:var(--blue); border:none; padding:20px; border-radius:15px; font-family:'Bebas Neue'; letter-spacing:2px;">GUARDAR COTIZACIÓN</button>
+                        <div id="download-buttons-area" class="mt-4" style="display: none; gap:10px; justify-content:center;">
+                            <a href="#" id="pdf-download-link" class="btn btn-danger btn-lg px-4" target="_blank">PDF</a>
+                            <a href="#" id="excel-download-link" class="btn btn-success btn-lg px-4">EXCEL</a>
                         </div>
                     </div>
                 </form>
@@ -254,14 +247,14 @@
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content" style="background: #0e1520; border: 1px solid var(--bdr); border-radius: 24px;">
                 <div class="modal-header border-0 p-4 pb-0">
-                    <h5 class="modal-title section-title" style="font-size: 28px; margin: 0;">Catálogo Maestro</h5>
+                    <h5 class="modal-title section-title" style="font-size: 28px; margin: 0;">Productos</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4 pt-0">
-                    <input type="text" class="form-control mb-4" id="search-productos" placeholder="Buscar producto..." style="background-color: #121520 !important;">
-                    <div class="table-responsive">
+                    <input type="text" class="form-control mb-4" id="search-productos" placeholder="Buscar...">
+                    <div class="table-responsive" style="max-height: 300px;">
                         <table class="table">
-                            <thead><tr><th style="color: var(--blue);">PRODUCTO</th><th style="color: var(--blue);">PRECIO</th><th></th></tr></thead>
+                            <thead><tr><th>PRODUCTO</th><th>PRECIO</th><th></th></tr></thead>
                             <tbody id="productos-tbody"></tbody>
                         </table>
                     </div>
@@ -271,7 +264,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}?v=2.1"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}?v=2.2"></script>
     <script>
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);

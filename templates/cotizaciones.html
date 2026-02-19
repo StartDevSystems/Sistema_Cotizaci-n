@@ -21,7 +21,6 @@
   --sub:   #7a8899;
   --dim:   #33404f;
   --blue:  #4f9eff;
-  --neon:  #00d4ff;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -35,7 +34,7 @@ body {
 #bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.78; }
 .shell { position: relative; z-index: 2; display: flex; min-height: 100vh; }
 
-/* SIDEBAR (Premium Unificado) */
+/* SIDEBAR */
 .sidebar {
   width: 72px; position: fixed; left: 0; top: 0; bottom: 0;
   background: rgba(8,11,18,0.95); backdrop-filter: blur(28px);
@@ -50,13 +49,31 @@ body {
 .sidebar:hover .sb-name { opacity: 1; }
 
 .nav-link {
-  width: 100%; display: flex; align-items: center; gap: 16px; padding: 14px 20px;
-  text-decoration: none; color: var(--sub); transition: 0.15s; white-space: nowrap; overflow: hidden;
+  width: 100%; display: flex; align-items: center; gap: 16px; padding: 18px 24px;
+  text-decoration: none; color: var(--sub); font-size: 17px;
+  transition: all 0.15s; white-space: nowrap; overflow: hidden;
   border-left: 2px solid transparent;
 }
 .nav-link.active { color: var(--text); border-left-color: var(--blue); background: rgba(79,158,255,0.08); }
+.nav-ico { width: 28px; flex-shrink: 0; display: grid; place-items: center; }
+.nav-ico svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; }
 .nav-txt { opacity: 0; transition: opacity 0.2s; }
 .sidebar:hover .nav-txt { opacity: 1; }
+
+/* MOBILE NAV */
+.mobile-nav {
+  display: none; position: fixed; bottom: 0; left: 0; right: 0;
+  height: 68px; z-index: 200;
+  background: rgba(8,11,18,0.97); backdrop-filter: blur(24px);
+  border-top: 1px solid var(--bdr);
+  align-items: center; justify-content: space-around; padding: 0 8px;
+}
+.mnav-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1;
+  text-decoration: none; color: #7a8899; font-size: 11px; font-weight: 500; text-transform: uppercase;
+}
+.mnav-btn.active { color: var(--blue); }
+.mnav-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; }
 
 /* MAIN */
 .main { margin-left: 72px; flex: 1; padding: 0 52px 120px; max-width: 1500px; }
@@ -64,41 +81,28 @@ body {
 .tb-section { font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 0.26em; color: var(--dim); margin-bottom: 6px; }
 .tb-title { font-size: 26px; font-weight: 600; color: var(--text); }
 
-/* STATS BAR */
-.stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 40px; }
-.stat-item { background: var(--card); border: 1px solid var(--bdr); border-radius: 15px; padding: 20px; text-align: center; }
-.stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--blue); }
-.stat-lbl { font-size: 12px; color: var(--sub); text-transform: uppercase; letter-spacing: 1px; }
-
-/* FILTROS */
 .filter-panel { background: var(--card); border: 1px solid var(--bdr); border-radius: 20px; padding: 25px; margin-bottom: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-items: end; }
-.f-grp label { display: block; font-family: 'Bebas Neue', sans-serif; font-size: 12px; letter-spacing: 0.1em; color: var(--sub); margin-bottom: 8px; }
 .f-input { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--bdr); border-radius: 10px; padding: 10px 15px; color: white; outline: none; font-size: 14px; }
-.f-input:focus { border-color: var(--blue); }
 
-/* CARDS */
 .cotizaciones-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
 .c-card {
   background: var(--card); border: 1px solid var(--bdr); border-radius: 20px; padding: 25px;
   position: relative; transition: transform 0.2s, border-color 0.2s;
 }
 .c-card:hover { transform: translateY(-5px); border-color: var(--blue); }
-.c-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
 .c-num { font-family: 'Bebas Neue', sans-serif; font-size: 14px; background: rgba(79,158,255,0.1); color: var(--blue); padding: 4px 10px; border-radius: 6px; }
 .c-total { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: white; }
-.c-client { font-size: 17px; font-weight: 600; margin-bottom: 5px; color: var(--text); }
-.c-date { font-size: 13px; color: var(--sub); margin-bottom: 20px; }
 
-.badge-s { font-size: 10px; padding: 4px 10px; border-radius: 5px; text-transform: uppercase; font-weight: 700; }
-.bg-p { background: rgba(245,166,35,0.1); color: #f5a623; }
-.bg-a { background: rgba(0,229,160,0.1); color: #00e5a0; }
-
-.btn-act { background: rgba(255,255,255,0.03); border: 1px solid var(--bdr); color: white; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; transition: 0.2s; display: inline-grid; place-items: center; text-decoration: none; }
-.btn-act:hover { background: var(--blue); border-color: var(--blue); }
-
-/* MODALES */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); z-index: 1000; display: none; place-items: center; padding: 20px; }
-.modal-card { background: var(--card); border: 1px solid var(--bdr); border-radius: 24px; padding: 40px; width: 100%; max-width: 800px; max-height: 90vh; overflow-y: auto; }
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .mobile-nav { display: flex; }
+  .main { margin-left: 0; padding: 20px 15px 100px; }
+  .topbar { padding: 30px 0; }
+  .tb-title { font-size: 22px; }
+  .filter-panel { grid-template-columns: 1fr; padding: 15px; }
+  .cotizaciones-grid { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
@@ -106,76 +110,63 @@ body {
 <canvas id="bg-canvas"></canvas>
 
 <div class="shell">
-  <!-- SIDEBAR UNIFICADO -->
   <aside class="sidebar">
     <div class="sb-logo">
       <img src="{{ url_for('static', filename='img/logo 1.2.png') }}" alt="Logo" style="height: 32px;">
       <span class="sb-name">BlueSky Energy</span>
     </div>
-    <nav class="nav-group w-100">
+    <nav class="nav-group">
       <a href="/dashboard" class="nav-link">
-        <span class="nav-ico" style="width:24px; display:grid; place-items:center;"><svg viewBox="0 0 24 24" style="width:18px; stroke:currentColor; stroke-width:1.7; fill:none;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+        <span class="nav-ico"><svg viewBox="0 0 24 24" style="width:20px; stroke:currentColor; stroke-width:1.8; fill:none;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
         <span class="nav-txt">Dashboard</span>
       </a>
       <a href="/" class="nav-link">
-        <span class="nav-ico" style="width:24px; display:grid; place-items:center;"><svg viewBox="0 0 24 24" style="width:18px; stroke:currentColor; stroke-width:1.7; fill:none;"><path d="M12 5v14M5 12h14"/></svg></span>
+        <span class="nav-ico"><svg viewBox="0 0 24 24" style="width:20px; stroke:currentColor; stroke-width:1.8; fill:none;"><path d="M12 5v14M5 12h14"/></svg></span>
         <span class="nav-txt">Nueva</span>
       </a>
       <a href="/cotizaciones" class="nav-link active">
-        <span class="nav-ico" style="width:24px; display:grid; place-items:center;"><svg viewBox="0 0 24 24" style="width:18px; stroke:currentColor; stroke-width:1.7; fill:none;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+        <span class="nav-ico"><svg viewBox="0 0 24 24" style="width:20px; stroke:currentColor; stroke-width:1.8; fill:none;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
         <span class="nav-txt">Cotizaciones</span>
       </a>
       <a href="/clientes" class="nav-link">
-        <span class="nav-ico" style="width:24px; display:grid; place-items:center;"><svg viewBox="0 0 24 24" style="width:18px; stroke:currentColor; stroke-width:1.7; fill:none;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+        <span class="nav-ico"><svg viewBox="0 0 24 24" style="width:20px; stroke:currentColor; stroke-width:1.8; fill:none;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>
         <span class="nav-txt">Clientes</span>
       </a>
     </nav>
   </aside>
 
+  <nav class="mobile-nav">
+    <a href="/dashboard" class="mnav-btn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Panel</span></a>
+    <a href="/" class="mnav-btn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Nueva</span></a>
+    <a href="/cotizaciones" class="mnav-btn active"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg><span>Listado</span></a>
+    <a href="/clientes" class="mnav-btn"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>Clientes</span></a>
+  </nav>
+
   <main class="main">
     <div class="topbar">
       <div>
-        <div class="tb-section">Sistema de Gestión / Documentos</div>
-        <div class="tb-title">Historial de Cotizaciones</div>
+        <div class="tb-section">Sistema / Documentos</div>
+        <div class="tb-title">Historial Guardado</div>
       </div>
     </div>
 
-    <!-- STATS -->
-    <div class="stats-bar" id="stats-section" style="display: none;">
-      <div class="stat-item"><p class="stat-lbl">Total Emitidas</p><div class="stat-val" id="stat-total">0</div></div>
-      <div class="stat-item"><p class="stat-lbl">Volumen Total</p><div class="stat-val" id="stat-monto">$0</div></div>
-      <div class="stat-item"><p class="stat-lbl">Ticket Promedio</p><div class="stat-val" id="stat-promedio">$0</div></div>
-      <div class="stat-item"><p class="stat-lbl">Este Mes</p><div class="stat-val" id="stat-mes">0</div></div>
-    </div>
-
-    <!-- FILTROS -->
     <div class="filter-panel">
-      <div class="f-grp"><label>Búsqueda Rápida</label><input type="text" class="f-input" id="search-input" placeholder="Nº o Cliente..."></div>
-      <div class="f-grp"><label>Desde</label><input type="date" class="f-input" id="fecha-desde"></div>
-      <div class="f-grp"><label>Hasta</label><input type="date" class="f-input" id="fecha-hasta"></div>
-      <div class="f-grp"><label>Estado</label>
-        <select class="f-input" id="filter-estado">
-          <option value="">Todos</option>
-          <option value="Pendiente">Pendiente</option>
-          <option value="Aprobada">Aprobada</option>
-        </select>
-      </div>
-      <button class="btn-blue" id="reset-filters" style="padding:10px;">Limpiar</button>
+      <input type="text" class="f-input" id="search-input" placeholder="Buscar por cliente o número...">
+      <input type="date" class="f-input" id="fecha-desde">
+      <input type="date" class="f-input" id="fecha-hasta">
+      <select class="f-input" id="filter-estado">
+        <option value="">Todos los estados</option>
+        <option value="Pendiente">Pendiente</option>
+        <option value="Aprobada">Aprobada</option>
+      </select>
     </div>
 
-    <!-- GRID -->
-    <div id="loading" style="text-align:center; padding:50px; color:var(--sub);">Cargando archivos...</div>
+    <div id="loading" style="text-align:center; padding:50px; color:var(--sub);">Accediendo al servidor...</div>
     <div id="cotizaciones-container" class="cotizaciones-grid"></div>
   </main>
 </div>
 
-<!-- MODAL DETALLES -->
-<div class="modal-overlay" id="detalleModal">
-  <div class="modal-card" id="modal-content"></div>
-</div>
-
 <script>
-// --- THREE.JS ---
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), alpha: true });
@@ -188,105 +179,56 @@ group.add(new THREE.Points(geo, new THREE.PointsMaterial({size: 0.08, color: '#4
 camera.position.z = 5;
 function anim() { requestAnimationFrame(anim); group.rotation.y += 0.001; renderer.render(scene, camera); } anim();
 
-// --- LÓGICA ---
 let todasLasCotizaciones = [];
-
 function cargarData() {
   fetch('/api/cotizaciones').then(r => r.json()).then(data => {
     if (data.status === 'ok') { 
       todasLasCotizaciones = data.cotizaciones; 
       render(todasLasCotizaciones); 
-      calcStats(todasLasCotizaciones);
       document.getElementById('loading').style.display = 'none';
     }
   });
 }
-
 function render(list) {
   const container = document.getElementById('cotizaciones-container');
   container.innerHTML = '';
   list.forEach(c => {
-    const isA = c.estado === 'Aprobada';
     container.innerHTML += `
       <div class="c-card">
         <div class="c-head">
           <span class="c-num">#${String(c.quote_number).padStart(3, '0')}</span>
-          <span class="badge-s ${isA?'bg-a':'bg-p'}">${c.estado}</span>
+          <span style="font-size:10px; text-transform:uppercase; color:var(--blue); font-weight:700;">${c.estado}</span>
         </div>
-        <div class="c-client">${c.cliente}</div>
-        <div class="c-date">${c.fecha}</div>
+        <div style="font-size:18px; font-weight:600; margin-bottom:5px;">${c.cliente}</div>
+        <div style="font-size:13px; color:var(--sub); margin-bottom:15px;">${c.fecha}</div>
         <div class="c-total">${c.total}</div>
         <div style="margin-top:20px; display:flex; gap:10px;">
-          <button class="btn-act" onclick="ver('${c.id}')">👁</button>
-          <a href="/descargar-pdf/${c.id}" class="btn-act" target="_blank">📄</a>
-          <button class="btn-act" onclick="duplicar('${c.id}')" style="margin-left:auto">📑</button>
-          <button class="btn-act" onclick="eliminar('${c.id}')" style="color:var(--sub)">✕</button>
+          <a href="/descargar-pdf/${c.id}" class="btn-main" target="_blank" style="padding:8px 15px; font-size:12px; text-decoration:none; text-align:center;">PDF</a>
+          <button onclick="duplicar('${c.id}')" style="background:rgba(255,255,255,0.05); border:1px solid var(--bdr); color:white; border-radius:10px; padding:0 15px; cursor:pointer;">📑</button>
         </div>
       </div>
     `;
   });
 }
-
-function calcStats(list) {
-  const total = list.length;
-  const monto = list.reduce((s, c) => s + parseFloat(c.total.replace('$','').replace(',','')), 0);
-  document.getElementById('stat-total').innerText = total;
-  document.getElementById('stat-monto').innerText = '$' + monto.toLocaleString();
-  document.getElementById('stat-promedio').innerText = '$' + (total?Math.round(monto/total):0).toLocaleString();
-  document.getElementById('stats-section').style.display = 'grid';
-}
-
-function ver(id) {
-  const c = todasLasCotizaciones.find(x => x.id === id);
-  const modal = document.getElementById('detalleModal');
-  document.getElementById('modal-content').innerHTML = `
-    <div class="tb-title" style="margin-bottom:20px">COTIZACIÓN #${String(c.quote_number).padStart(3,'0')}</div>
-    <p style="color:var(--sub)">Cliente: <b style="color:white">${c.cliente}</b></p>
-    <p style="color:var(--sub); margin-bottom:30px">Fecha: ${c.fecha}</p>
-    <div style="background:rgba(255,255,255,0.03); border-radius:15px; padding:20px; margin-bottom:30px">
-      ${c.items.map(i => `<div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:14px">
-        <span>${i.cantidad}x ${i.descripcion}</span>
-        <b style="color:var(--blue)">$${(i.cantidad*i.precio).toLocaleString()}</b>
-      </div>`).join('')}
-    </div>
-    <div style="text-align:right; font-family:'Bebas Neue'; font-size:42px">${c.total}</div>
-    <button class="btn-blue" style="width:100%; margin-top:30px" onclick="document.getElementById('detalleModal').style.display='none'">CERRAR</button>
-  `;
-  modal.style.display = 'grid';
-}
-
-function eliminar(id) {
-  if(confirm('¿Eliminar definitivamente?')) {
-    fetch('/api/cotizaciones/'+id, {method:'DELETE'}).then(() => cargarData());
-  }
-}
-
-function duplicar(id) {
-  fetch('/api/cotizaciones/'+id+'/duplicar', {method:'POST'}).then(() => cargarData());
-}
-
-// Filtros
+function duplicar(id) { fetch('/api/cotizaciones/'+id+'/duplicar', {method:'POST'}).then(() => cargarData()); }
 document.getElementById('search-input').oninput = apply;
 document.getElementById('fecha-desde').onchange = apply;
 document.getElementById('fecha-hasta').onchange = apply;
 document.getElementById('filter-estado').onchange = apply;
-
 function apply() {
   const s = document.getElementById('search-input').value.toLowerCase();
   const d = document.getElementById('fecha-desde').value;
   const h = document.getElementById('fecha-hasta').value;
   const e = document.getElementById('filter-estado').value;
-  
   const f = todasLasCotizaciones.filter(c => {
-    const matchS = c.cliente.toLowerCase().includes(s) || String(c.quote_number).includes(s);
-    const matchD = d ? c.fecha >= d : true;
-    const matchH = h ? c.fecha <= h : true;
-    const matchE = e ? c.estado === e : true;
-    return matchS && matchD && matchH && matchE;
+    const mS = c.cliente.toLowerCase().includes(s) || String(c.quote_number).includes(s);
+    const mD = d ? c.fecha >= d : true;
+    const mH = h ? c.fecha <= h : true;
+    const mE = e ? c.estado === e : true;
+    return mS && mD && mH && mE;
   });
   render(f);
 }
-
 cargarData();
 window.onresize = () => { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); };
 </script>

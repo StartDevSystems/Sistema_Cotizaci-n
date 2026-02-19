@@ -33,7 +33,7 @@ body {
 #bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.78; }
 .shell { position: relative; z-index: 2; display: flex; min-height: 100vh; }
 
-/* SIDEBAR (Copiado del Dashboard) */
+/* SIDEBAR */
 .sidebar {
   width: 72px; position: fixed; left: 0; top: 0; bottom: 0;
   background: rgba(8,11,18,0.95); backdrop-filter: blur(28px);
@@ -48,13 +48,31 @@ body {
 .sidebar:hover .sb-name { opacity: 1; }
 
 .nav-link {
-  width: 100%; display: flex; align-items: center; gap: 16px; padding: 14px 20px;
-  text-decoration: none; color: var(--sub); transition: 0.15s; white-space: nowrap; overflow: hidden;
+  width: 100%; display: flex; align-items: center; gap: 16px; padding: 18px 24px;
+  text-decoration: none; color: var(--sub); font-size: 17px; font-weight: 500;
+  transition: all 0.15s; white-space: nowrap; overflow: hidden;
   border-left: 2px solid transparent;
 }
 .nav-link.active { color: var(--text); border-left-color: var(--blue); background: rgba(79,158,255,0.08); }
+.nav-ico { width: 28px; flex-shrink: 0; display: grid; place-items: center; }
+.nav-ico svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; }
 .nav-txt { opacity: 0; transition: opacity 0.2s; }
 .sidebar:hover .nav-txt { opacity: 1; }
+
+/* MOBILE NAV */
+.mobile-nav {
+  display: none; position: fixed; bottom: 0; left: 0; right: 0;
+  height: 68px; z-index: 200;
+  background: rgba(8,11,18,0.97); backdrop-filter: blur(24px);
+  border-top: 1px solid var(--bdr);
+  align-items: center; justify-content: space-around; padding: 0 8px;
+}
+.mnav-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1;
+  text-decoration: none; color: #7a8899; font-size: 11px; font-weight: 500; text-transform: uppercase;
+}
+.mnav-btn.active { color: var(--blue); }
+.mnav-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; }
 
 /* MAIN */
 .main { margin-left: 72px; flex: 1; padding: 0 52px 120px; max-width: 1500px; }
@@ -62,39 +80,31 @@ body {
 .tb-section { font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 0.26em; color: var(--dim); margin-bottom: 6px; }
 .tb-title { font-size: 26px; font-weight: 600; color: var(--text); }
 
-/* PANEL */
 .panel { background: var(--card); border: 1px solid var(--bdr); border-radius: 20px; padding: 36px; }
-.panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-.panel-title { font-size: 17px; font-weight: 600; color: var(--text); }
-
-/* INPUTS (Estilo Dashboard) */
 .search-box {
   background: rgba(255,255,255,0.03); border: 1px solid var(--bdr); border-radius: 12px;
   padding: 14px 20px; color: white; width: 100%; outline: none; margin-bottom: 30px;
-  transition: border-color 0.2s;
 }
-.search-box:focus { border-color: var(--blue); }
 
-/* TABLE (Estilo Dashboard) */
 table { width: 100%; border-collapse: collapse; }
 thead th { font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 0.18em; color: var(--dim); text-align: left; padding: 0 0 18px; border-bottom: 1px solid var(--bdr); }
-tbody td { padding: 18px 0; font-size: 15px; border-bottom: 1px solid var(--bdr2); vertical-align: middle; }
-.c-name { font-weight: 500; color: var(--text); }
-.c-emp { color: var(--sub); font-size: 14px; }
+tbody td { padding: 18px 0; font-size: 15px; border-bottom: 1px solid var(--bdr2); }
 
 .btn-blue {
-  background: var(--blue); color: white; border: none; padding: 10px 20px; border-radius: 10px;
-  font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 0.1em; cursor: pointer;
-  transition: opacity 0.2s;
+  background: var(--blue); color: white; border: none; padding: 12px 24px; border-radius: 10px;
+  font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.1em; cursor: pointer;
 }
-.btn-blue:hover { opacity: 0.9; }
 
-/* MODAL */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 1000; display: none; place-items: center; }
-.modal-card { background: var(--card); border: 1px solid var(--bdr); border-radius: 24px; padding: 40px; width: 100%; max-width: 500px; }
-.form-grp { margin-bottom: 20px; }
-.form-grp label { display: block; font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 0.1em; color: var(--sub); margin-bottom: 8px; }
-.form-input { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--bdr); border-radius: 10px; padding: 12px; color: white; outline: none; }
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .mobile-nav { display: flex; }
+  .main { margin-left: 0; padding: 20px 15px 100px; }
+  .topbar { flex-direction: column; align-items: flex-start; gap: 20px; padding: 30px 0; }
+  .panel { padding: 20px; }
+  .btn-blue { width: 100%; }
+  .table-responsive { overflow-x: auto; display: block; width: 100%; }
+}
 </style>
 </head>
 <body>
@@ -102,7 +112,6 @@ tbody td { padding: 18px 0; font-size: 15px; border-bottom: 1px solid var(--bdr2
 <canvas id="bg-canvas"></canvas>
 
 <div class="shell">
-  <!-- SIDEBAR (MISMO QUE DASHBOARD) -->
   <aside class="sidebar">
     <div class="sb-logo">
       <img src="{{ url_for('static', filename='img/logo 1.2.png') }}" alt="Logo" style="height: 32px;">
@@ -110,83 +119,60 @@ tbody td { padding: 18px 0; font-size: 15px; border-bottom: 1px solid var(--bdr2
     </div>
     <nav class="nav-group">
       <a href="/dashboard" class="nav-link">
-        <span class="nav-ico" style="width:24px; display:grid; place-items:center;"><svg viewBox="0 0 24 24" style="width:18px; stroke:currentColor; stroke-width:1.7; fill:none;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+        <span class="nav-ico"><svg viewBox="0 0 24 24" style="width:20px; stroke:currentColor; stroke-width:1.8; fill:none;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
         <span class="nav-txt">Dashboard</span>
       </a>
       <a href="/" class="nav-link">
-        <span class="nav-ico" style="width:24px; display:grid; place-items:center;"><svg viewBox="0 0 24 24" style="width:18px; stroke:currentColor; stroke-width:1.7; fill:none;"><path d="M12 5v14M5 12h14"/></svg></span>
+        <span class="nav-ico"><svg viewBox="0 0 24 24" style="width:20px; stroke:currentColor; stroke-width:1.8; fill:none;"><path d="M12 5v14M5 12h14"/></svg></span>
         <span class="nav-txt">Nueva</span>
       </a>
       <a href="/cotizaciones" class="nav-link">
-        <span class="nav-ico" style="width:24px; display:grid; place-items:center;"><svg viewBox="0 0 24 24" style="width:18px; stroke:currentColor; stroke-width:1.7; fill:none;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+        <span class="nav-ico"><svg viewBox="0 0 24 24" style="width:20px; stroke:currentColor; stroke-width:1.8; fill:none;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
         <span class="nav-txt">Cotizaciones</span>
       </a>
       <a href="/clientes" class="nav-link active">
-        <span class="nav-ico" style="width:24px; display:grid; place-items:center;"><svg viewBox="0 0 24 24" style="width:18px; stroke:currentColor; stroke-width:1.7; fill:none;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+        <span class="nav-ico"><svg viewBox="0 0 24 24" style="width:20px; stroke:currentColor; stroke-width:1.8; fill:none;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>
         <span class="nav-txt">Clientes</span>
       </a>
     </nav>
   </aside>
 
+  <nav class="mobile-nav">
+    <a href="/dashboard" class="mnav-btn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Panel</span></a>
+    <a href="/" class="mnav-btn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Nueva</span></a>
+    <a href="/cotizaciones" class="mnav-btn"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg><span>Listado</span></a>
+    <a href="/clientes" class="mnav-btn active"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>Clientes</span></a>
+  </nav>
+
   <main class="main">
     <div class="topbar">
       <div>
-        <div class="tb-section">Sistema de Gestión / Clientes</div>
-        <div class="tb-title">Directorio Maestro</div>
+        <div class="tb-section">Sistema / Directorio</div>
+        <div class="tb-title">Clientes Registrados</div>
       </div>
       <button class="btn-blue" onclick="document.getElementById('modal').style.display='grid'">+ NUEVO CLIENTE</button>
     </div>
 
     <div class="panel">
-      <input type="text" class="search-box" id="search-clientes" placeholder="Buscar por nombre o empresa...">
-      
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre del Cliente</th>
-            <th>Empresa</th>
-            <th>Email / Contacto</th>
-            <th style="text-align:center">Cotizaciones</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="clientes-tbody"></tbody>
-      </table>
+      <input type="text" class="search-box" id="search-clientes" placeholder="Buscar cliente...">
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Empresa</th>
+              <th style="text-align:center">Docs</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="clientes-tbody"></tbody>
+        </table>
+      </div>
     </div>
   </main>
 </div>
 
-<!-- MODAL REGISTRO -->
-<div class="modal-overlay" id="modal">
-  <div class="modal-card">
-    <div class="panel-head">
-      <div class="panel-title">REGISTRAR NUEVO CLIENTE</div>
-      <span style="cursor:pointer; color:var(--sub)" onclick="document.getElementById('modal').style.display='none'">✕</span>
-    </div>
-    <form id="form-nuevo-cliente">
-      <div class="form-grp">
-        <label>Nombre Completo</label>
-        <input type="text" class="form-input" name="nombre" required>
-      </div>
-      <div class="form-grp">
-        <label>Empresa</label>
-        <input type="text" class="form-input" name="empresa">
-      </div>
-      <div class="form-grp">
-        <label>Email</label>
-        <input type="email" class="form-input" name="email">
-      </div>
-      <div class="form-grp">
-        <label>Teléfono</label>
-        <input type="tel" class="form-input" name="telefono">
-      </div>
-      <button type="button" class="btn-blue" style="width:100%; padding:15px;" id="btn-guardar-cliente">GUARDAR REGISTRO</button>
-    </form>
-  </div>
-</div>
-
 <script>
-// --- THREE.JS (Mismo que Dashboard) ---
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), alpha: true });
@@ -199,7 +185,6 @@ group.add(new THREE.Points(geo, new THREE.PointsMaterial({size: 0.08, color: '#4
 camera.position.z = 5;
 function anim() { requestAnimationFrame(anim); group.rotation.y += 0.001; renderer.render(scene, camera); } anim();
 
-// --- LÓGICA ---
 let todosLosClientes = [];
 function cargarClientes() {
   fetch('/api/clientes').then(r => r.json()).then(data => {
@@ -211,10 +196,9 @@ function renderClientes(clientes) {
   tbody.innerHTML = '';
   clientes.forEach(c => {
     tbody.innerHTML += `<tr>
-      <td><span class="c-name">${c.nombre}</span></td>
-      <td><span class="c-emp">${c.empresa || '-'}</span></td>
-      <td style="color:var(--sub)">${c.email || '-'}</td>
-      <td style="text-align:center"><span style="font-family:'Bebas Neue'; font-size:18px; color:var(--blue)">${c.total_cotizaciones}</span></td>
+      <td><b>${c.nombre}</b></td>
+      <td style="color:var(--sub)">${c.empresa || '-'}</td>
+      <td style="text-align:center; color:var(--blue); font-family:'Bebas Neue';">${c.total_cotizaciones}</td>
       <td style="text-align:right"><button class="btn-blue" onclick="window.location.href='/cotizaciones?cliente=${encodeURIComponent(c.nombre)}'" style="padding:5px 12px">👁</button></td>
     </tr>`;
   });
@@ -222,11 +206,6 @@ function renderClientes(clientes) {
 document.getElementById('search-clientes').oninput = (e) => {
   const t = e.target.value.toLowerCase();
   renderClientes(todosLosClientes.filter(c => c.nombre.toLowerCase().includes(t) || (c.empresa && c.empresa.toLowerCase().includes(t))));
-};
-document.getElementById('btn-guardar-cliente').onclick = () => {
-  const data = Object.fromEntries(new FormData(document.getElementById('form-nuevo-cliente')));
-  fetch('/api/clientes', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) })
-  .then(r => r.json()).then(() => { document.getElementById('modal').style.display='none'; cargarClientes(); });
 };
 cargarClientes();
 window.onresize = () => { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); };
