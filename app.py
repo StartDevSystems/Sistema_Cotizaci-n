@@ -272,8 +272,13 @@ def descargar_pdf(cotizacion_id):
         data['fecha_formateada'] = format_spanish_date(fecha_obj)
         data['fecha_validez'] = format_spanish_date(fecha_obj + datetime.timedelta(days=15))
         
-        logo_path = os.path.join(app.static_folder, 'img', 'logo.jpg')
-        data['logo_url'] = Path(logo_path).as_uri()
+        # Ruta corregida para Docker y Render
+        logo_path = os.path.join(os.getcwd(), 'static', 'img', 'logo.jpg')
+        if os.path.exists(logo_path):
+            data['logo_url'] = Path(logo_path).as_uri()
+        else:
+            logger.warning(f"No se encontró el logo en: {logo_path}")
+            data['logo_url'] = ""
         
         pdf = HTML(string=render_template('cotizacion_pdf.html', **data)).write_pdf()
         res = make_response(pdf)
