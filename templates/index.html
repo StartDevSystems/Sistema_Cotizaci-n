@@ -4,101 +4,228 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nueva Cotización - BlueSky Energy</title>
-    <link rel="icon" type="image/jpg" href="{{ url_for('static', filename='img/logo.jpg') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo 1.2.png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
     <style>
         :root {
-            --bluesky-dark-blue: #0d2a42;
-            --bluesky-light-blue: #2cb0e8;
+            --bg: #02040a;
+            --card: #0a0f1a;
+            --neon: #00d4ff;
+            --blue: #4f9eff;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
         }
+
         body {
-            background-color: #f8f9fa;
+            background: var(--bg) !important;
+            color: #ffffff !important;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            min-height: 100vh;
+            color-scheme: dark; /* OBLIGA AL NAVEGADOR A USAR CONTROLES OSCUROS */
         }
-        .navbar-brand img {
-            max-height: 40px;
+
+        /* FUERZA BRUTA PARA EL SELECT Y SUS OPCIONES */
+        select, option {
+            background-color: #0a0f1a !important;
+            color: white !important;
         }
-        .bg-primary { background-color: var(--bluesky-dark-blue) !important; }
-        .btn-primary { background-color: var(--bluesky-dark-blue); border-color: var(--bluesky-dark-blue); }
-        .btn-primary:hover { background-color: #0a2033; border-color: #0a2033; }
-        .text-primary { color: var(--bluesky-dark-blue) !important; }
+
+        #three-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.6; }
+
+        .shell { position: relative; z-index: 2; display: flex; min-height: 100vh; }
+
+        /* SIDEBAR PREMIUM */
+        .sidebar {
+            width: 72px; position: fixed; left: 0; top: 0; bottom: 0;
+            background: rgba(5, 8, 15, 0.98); backdrop-filter: blur(30px);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; align-items: center;
+            padding: 28px 0; z-index: 100;
+            transition: width 0.3s cubic-bezier(.22,1,.36,1);
+        }
+        .sidebar:hover { width: 240px; }
+        .sb-logo { width: 100%; display: flex; align-items: center; gap: 14px; padding: 0 20px; margin-bottom: 40px; overflow: hidden; }
+        .sb-name { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.14em; white-space: nowrap; opacity: 0; transition: 0.2s; color: #fff; }
+        .sidebar:hover .sb-name { opacity: 1; }
+
+        .nav-link {
+            width: 100%; display: flex; align-items: center; gap: 16px; padding: 14px 20px;
+            text-decoration: none; color: #5c6b84; transition: 0.2s; white-space: nowrap; overflow: hidden;
+        }
+        .nav-link.active { color: #fff; background: rgba(79,158,255,0.1); border-left: 3px solid var(--blue); }
+        .nav-ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; }
+
+        /* CENTRADO MAESTRO */
+        .main-content { 
+            flex: 1; 
+            margin-left: 72px; 
+            padding: 60px 20px; 
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
         
+        .premium-card {
+            background: rgba(10, 15, 26, 0.8) !important;
+            backdrop-filter: blur(40px);
+            border: 1px solid var(--border) !important;
+            border-radius: 30px;
+            padding: 50px;
+            width: 100%;
+            max-width: 1100px;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+        }
+
+        .section-title { 
+            font-family: 'Bebas Neue', sans-serif; 
+            font-size: 42px; 
+            color: var(--neon); 
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+            margin-bottom: 40px;
+        }
+
+        /* 🚨 TOTAL ANNIHILATION OF WHITE INPUTS 🚨 */
+        .form-label { 
+            color: var(--blue) !important;
+            font-weight: 700 !important;
+            text-transform: uppercase;
+            font-size: 13px !important;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        input, select, textarea, .form-control, .form-select {
+            background-color: rgba(255, 255, 255, 0.04) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: #ffffff !important;
+            border-radius: 15px !important;
+            padding: 15px 20px !important;
+            font-size: 16px !important;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            background-color: rgba(255, 255, 255, 0.07) !important;
+            border-color: var(--neon) !important;
+            box-shadow: 0 0 25px rgba(0, 212, 255, 0.2) !important;
+            outline: none !important;
+        }
+
+        ::placeholder { color: rgba(255, 255, 255, 0.2) !important; }
+
+        /* TABLA CRISTAL */
+        .table { --bs-table-bg: transparent !important; color: white !important; }
+        .table thead th { 
+            background: transparent !important;
+            color: var(--neon) !important;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 20px;
+            border-bottom: 1px solid var(--border) !important;
+            padding-bottom: 15px;
+        }
+        .table td { 
+            background: transparent !important; 
+            border: none !important; 
+            padding: 12px 10px !important;
+        }
+
+        .btn-premium {
+            background: linear-gradient(135deg, #007bff, #00d4ff) !important;
+            border: none !important;
+            color: white !important;
+            font-weight: 800;
+            border-radius: 15px;
+            padding: 20px 40px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: 0.4s;
+        }
+        .btn-premium:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 212, 255, 0.4);
+        }
+
+        .total-box {
+            text-align: right;
+            padding: 20px;
+        }
+        .total-label { color: var(--neon); font-family: 'Bebas Neue', sans-serif; font-size: 20px; margin: 0; }
+        .total-val { font-family: 'Bebas Neue', sans-serif; font-size: 72px; color: white; line-height: 1; }
+
+        /* Autocomplete */
         .autocomplete-items {
-            position: absolute;
-            border: 1px solid #d4d4d4;
-            border-bottom: none;
-            border-top: none;
-            z-index: 99;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background-color: white;
-            max-height: 200px;
-            overflow-y: auto;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: #0a0f1a; border: 1px solid var(--neon); border-radius: 15px;
+            position: absolute; width: 100%; z-index: 1000; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
-        .autocomplete-items div {
-            padding: 10px;
-            cursor: pointer;
-            border-bottom: 1px solid #d4d4d4;
-        }
-        .autocomplete-items div:hover {
-            background-color: #e9ecef;
-        }
-        .autocomplete-active {
-            background-color: #2cb0e8 !important;
-            color: #ffffff;
-        }
+        .autocomplete-items div { padding: 15px; cursor: pointer; border-bottom: 1px solid var(--border); }
+        .autocomplete-items div:hover { background: var(--blue); }
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="/">
-                <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="BlueSky Energy Logo" class="me-2">
-                <span class="fs-5">BlueSky Energy - Sistema de Cotizaciones</span>
-            </a>
-            <div class="d-flex gap-2">
-                <a href="/dashboard" class="btn btn-outline-light">
-                    <i class="bi bi-speedometer2"></i> Dashboard
-                </a>
-                <a href="/cotizaciones" class="btn btn-outline-light">
-                    <i class="bi bi-list-ul"></i> Cotizaciones
-                </a>
-                <a href="/clientes" class="btn btn-outline-light">
-                    <i class="bi bi-people"></i> Clientes
-                </a>
+    <canvas id="three-canvas"></canvas>
+
+    <div class="shell">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sb-logo">
+                <img src="{{ url_for('static', filename='img/logo 1.2.png') }}" alt="Logo" style="height: 32px;">
+                <span class="sb-name">BlueSky Energy</span>
             </div>
-        </div>
-    </nav>
-    
-    <div class="container mt-4 mb-5">
-        <div class="card shadow-lg">
-            <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                <h4 class="mb-0 text-primary">Crear Nueva Cotización</h4>
-                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#productosModal">
-                    <i class="bi bi-box-seam"></i> Ver Productos
-                </button>
-            </div>
-            <div class="card-body p-4">
+            <nav class="nav-group w-100">
+                <a href="/dashboard" class="nav-link">
+                    <span class="nav-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+                    <span class="sb-name">Dashboard</span>
+                </a>
+                <a href="/" class="nav-link active">
+                    <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></span>
+                    <span class="sb-name">Nueva Cotización</span>
+                </a>
+                <a href="/cotizaciones" class="nav-link">
+                    <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="2"/></svg></span>
+                    <span class="sb-name">Cotizaciones</span>
+                </a>
+                <a href="/clientes" class="nav-link">
+                    <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg></span>
+                    <span class="sb-name">Clientes</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="premium-card">
+                <div class="d-flex justify-content-between align-items-center mb-5">
+                    <h1 class="section-title mb-0">Generar Cotización</h1>
+                    <button class="btn btn-outline-info btn-sm px-4" data-bs-toggle="modal" data-bs-target="#productosModal" style="border-radius: 12px; border-color: var(--border); color: #fff;">
+                        📂 CATÁLOGO
+                    </button>
+                </div>
+
                 <form id="cotizacion-form">
-                    <div class="row mb-4">
+                    <div class="row g-4 mb-5">
                         <div class="col-md-6">
-                            <label for="cliente" class="form-label">Nombre del Cliente *</label>
+                            <label class="form-label">Cliente</label>
                             <div class="position-relative">
-                                <input type="text" class="form-control" id="cliente" placeholder="Ej: Juan Pérez" required autocomplete="off">
+                                <input type="text" class="form-control" id="cliente" placeholder="Nombre del cliente..." required autocomplete="off" style="background: rgba(255,255,255,0.05)!important; color: white!important;">
                                 <div id="cliente-autocomplete" class="autocomplete-items"></div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <label for="fecha" class="form-label">Fecha</label>
-                            <input type="date" class="form-control" id="fecha" required>
+                            <label class="form-label">Fecha</label>
+                            <input type="date" class="form-control" id="fecha" required style="background: rgba(255,255,255,0.05)!important; color: white!important;">
                         </div>
                         <div class="col-md-3">
-                            <label for="estado" class="form-label">Estado</label>
-                            <select class="form-select" id="estado">
-                                <option value="Pendiente" selected>Pendiente</option>
+                            <label class="form-label">Estado</label>
+                            <select class="form-select" id="estado" style="background: rgba(255,255,255,0.05)!important; color: white!important;">
+                                <option value="Pendiente">Pendiente</option>
                                 <option value="Aprobada">Aprobada</option>
                                 <option value="Rechazada">Rechazada</option>
                                 <option value="En Revisión">En Revisión</option>
@@ -107,120 +234,66 @@
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="mt-4">Conceptos</h5>
-                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#productosModal">
-                            <i class="bi bi-plus-square"></i> Agregar desde Plantilla
+                        <h5 class="section-title mb-0" style="font-size: 22px;">Conceptos</h5>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="add-row-btn" style="border-color: var(--border); color: #7a8899;">
+                            + AÑADIR FILA
                         </button>
                     </div>
 
-                    <table class="table" id="items-table">
-                        <thead class="table-light">
-                            <tr>
-                                <th scope="col" style="width: 50%;">Descripción</th>
-                                <th scope="col">Cantidad</th>
-                                <th scope="col">Precio Unitario</th>
-                                <th scope="col">Total</th>
-                                <th scope="col"></th>
-                            </tr>
-                        </thead>
-                        <tbody id="items-tbody"></tbody>
-                    </table>
-                    <button type="button" class="btn btn-secondary btn-sm" id="add-row-btn">
-                        <i class="bi bi-plus-circle"></i> Agregar Fila
-                    </button>
+                    <div class="table-responsive">
+                        <table class="table" id="items-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50%;">DESCRIPCIÓN</th>
+                                    <th style="width: 10%;">CANT.</th>
+                                    <th style="width: 15%;">PRECIO</th>
+                                    <th style="width: 15%;">TOTAL</th>
+                                    <th style="width: 5%;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="items-tbody"></tbody>
+                        </table>
+                    </div>
 
-                    <div class="row justify-content-end mt-4">
-                        <div class="col-md-4 text-end">
-                            <h4>Total General: <span id="total-general" class="fw-bold text-primary">$0.00</span></h4>
+                    <div class="row align-items-end mt-5">
+                        <div class="col-md-6">
+                            <label class="form-label">Notas</label>
+                            <textarea class="form-control" id="notas" rows="3" placeholder="Información adicional..." style="background: rgba(255,255,255,0.05)!important; color: white!important;"></textarea>
+                        </div>
+                        <div class="col-md-6 total-box">
+                            <p class="total-label">Inversión Estimada</p>
+                            <div class="total-val" id="total-general">$0.00</div>
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="notas" class="form-label">Notas (Opcional)</label>
-                        <textarea class="form-control" id="notas" rows="2" placeholder="Observaciones adicionales..."></textarea>
-                    </div>
-
-                    <hr class="my-4">
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="bi bi-save"></i> Guardar Cotización
+                    <div class="text-center mt-5">
+                        <button type="submit" class="btn btn-premium btn-lg w-100">
+                            🚀 PROCESAR Y GUARDAR COTIZACIÓN
                         </button>
-                        <span id="download-buttons-area" style="display: none;">
-                            <a href="#" id="pdf-download-link" class="btn btn-danger btn-lg" target="_blank">
-                                <i class="bi bi-file-earmark-pdf"></i> PDF
-                            </a>
-                            <a href="#" id="excel-download-link" class="btn btn-success btn-lg">
-                                <i class="bi bi-file-earmark-excel"></i> Excel
-                            </a>
-                        </span>
+                        <div id="download-buttons-area" class="mt-4" style="display: none;">
+                            <a href="#" id="pdf-download-link" class="btn btn-danger btn-lg me-2" target="_blank"><i class="bi bi-file-pdf"></i></a>
+                            <a href="#" id="excel-download-link" class="btn btn-success btn-lg"><i class="bi bi-file-excel"></i></a>
+                        </div>
                     </div>
                 </form>
             </div>
-        </div>
+        </main>
     </div>
 
-    <!-- MODAL DE PRODUCTOS -->
+    <!-- MODAL PRODUCTOS -->
     <div class="modal fade" id="productosModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">
-                        <i class="bi bi-box-seam"></i> Plantillas de Productos
-                    </h5>
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="background: #0a0f1a; border: 1px solid var(--border); border-radius: 25px;">
+                <div class="modal-header border-0 p-4">
+                    <h5 class="modal-title section-title" style="font-size: 28px; margin: 0;">Catálogo Maestro</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="d-flex justify-content-between mb-3">
-                        <input type="text" class="form-control" id="search-productos" placeholder="Buscar producto..." style="max-width: 300px;">
-                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoProductoModal">
-                            <i class="bi bi-plus"></i> Nuevo Producto
-                        </button>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Descripción</th>
-                                    <th>Precio</th>
-                                    <th>Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody id="productos-tbody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL NUEVO PRODUCTO -->
-    <div class="modal fade" id="nuevoProductoModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">Nuevo Producto</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="form-nuevo-producto">
-                        <div class="mb-3">
-                            <label class="form-label">Nombre *</label>
-                            <input type="text" class="form-control" name="nombre" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Descripción *</label>
-                            <textarea class="form-control" name="descripcion" rows="2" required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Precio *</label>
-                            <input type="number" class="form-control" name="precio" step="0.01" required>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="btn-guardar-producto">Guardar</button>
+                <div class="modal-body p-4 pt-0">
+                    <input type="text" class="form-control mb-4" id="search-productos" placeholder="Buscar producto..." style="background: rgba(255,255,255,0.05)!important; color: white!important;">
+                    <table class="table">
+                        <thead><tr><th>Producto</th><th>Precio</th><th></th></tr></thead>
+                        <tbody id="productos-tbody"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -229,136 +302,66 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script>
-        // AUTOCOMPLETAR CLIENTES
+        // THREE.JS
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        const group = new THREE.Group(); scene.add(group);
+        const count = 60; const pos = new Float32Array(count*3);
+        for(let i=0; i<count*3; i++) pos[i] = (Math.random()-0.5)*12;
+        const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        group.add(new THREE.Points(geo, new THREE.PointsMaterial({size: 0.12, color: '#00d4ff', transparent: true, opacity: 0.8})));
+        camera.position.z = 5;
+        function anim() { requestAnimationFrame(anim); group.rotation.y += 0.001; renderer.render(scene, camera); } anim();
+
+        // LÓGICA DE NEGOCIO
         let clientesData = [];
-        
-        fetch('/api/clientes')
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'ok') {
-                    clientesData = data.clientes;
-                }
-            });
+        fetch('/api/clientes').then(r => r.json()).then(d => { if(d.status==='ok') clientesData = d.clientes; });
 
         const clienteInput = document.getElementById('cliente');
-        const autocompleteDiv = document.getElementById('cliente-autocomplete');
-
+        const autoDiv = document.getElementById('cliente-autocomplete');
         clienteInput.addEventListener('input', function() {
-            const val = this.value.toLowerCase();
-            autocompleteDiv.innerHTML = '';
-            
-            if (!val) return;
-
-            const matches = clientesData.filter(c => 
-                c.nombre.toLowerCase().includes(val)
-            ).slice(0, 5);
-
-            matches.forEach(cliente => {
-                const div = document.createElement('div');
-                div.innerHTML = `<strong>${cliente.nombre}</strong>${cliente.empresa ? ` - ${cliente.empresa}` : ''}`;
-                div.addEventListener('click', function() {
-                    clienteInput.value = cliente.nombre;
-                    autocompleteDiv.innerHTML = '';
-                });
-                autocompleteDiv.appendChild(div);
+            const val = this.value.toLowerCase(); autoDiv.innerHTML = ''; if(!val) return;
+            clientesData.filter(c => c.nombre.toLowerCase().includes(val)).slice(0,5).forEach(c => {
+                const d = document.createElement('div'); d.innerHTML = `<b>${c.nombre}</b> <small style="opacity:0.5">${c.empresa || ''}</small>`;
+                d.onclick = () => { clienteInput.value = c.nombre; autoDiv.innerHTML = ''; };
+                autoDiv.appendChild(d);
             });
         });
-
-        document.addEventListener('click', function(e) {
-            if (e.target !== clienteInput) {
-                autocompleteDiv.innerHTML = '';
-            }
-        });
-
-        // PRODUCTOS
-        let productosData = [];
 
         function cargarProductos() {
-            fetch('/api/productos')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'ok') {
-                        productosData = data.productos;
-                        renderProductos(productosData);
-                    }
+            fetch('/api/productos').then(r => r.json()).then(d => {
+                const tb = document.getElementById('productos-tbody'); tb.innerHTML = '';
+                d.productos.forEach(p => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td style="color:white"><b>${p.nombre}</b></td>
+                                     <td style="color:var(--neon); font-weight:bold">$${p.precio}</td>
+                                     <td><button class="btn btn-sm btn-info text-dark fw-bold" onclick="agregarProducto('${p.nombre}', '${p.descripcion}', ${p.precio})" style="border-radius:8px">AÑADIR</button></td>`;
+                    tb.appendChild(row);
                 });
-        }
-
-        function renderProductos(productos) {
-            const tbody = document.getElementById('productos-tbody');
-            tbody.innerHTML = '';
-
-            if (productos.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No hay productos</td></tr>';
-                return;
-            }
-
-            productos.forEach(prod => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><strong>${prod.nombre}</strong></td>
-                    <td>${prod.descripcion}</td>
-                    <td>$${prod.precio.toFixed(2)}</td>
-                    <td>
-                        <button class="btn btn-sm btn-primary" onclick="agregarProducto('${prod.nombre}', '${prod.descripcion}', ${prod.precio})">
-                            <i class="bi bi-plus"></i> Agregar
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(row);
             });
         }
-
-        function agregarProducto(nombre, descripcion, precio) {
-            const tbody = document.getElementById('items-tbody');
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = `
-                <td><input type="text" class="form-control" name="descripcion" value="${descripcion}"></td>
-                <td><input type="number" class="form-control item-calc" name="cantidad" value="1" min="1"></td>
-                <td><input type="number" class="form-control item-calc" name="precio" value="${precio}" step="0.01" min="0"></td>
-                <td><input type="text" class="form-control item-total" readonly value="$${precio.toFixed(2)}"></td>
-                <td><button type="button" class="btn btn-danger btn-sm remove-row"><i class="bi bi-trash"></i></button></td>
-            `;
-            tbody.appendChild(newRow);
-            
+        function agregarProducto(n, d, p) {
+            const tb = document.getElementById('items-tbody');
+            const r = document.createElement('tr');
+            r.innerHTML = `<td><input type="text" class="form-control" name="descripcion" value="${d}" style="background:rgba(255,255,255,0.05)!important; color:white!important; border:1px solid rgba(255,255,255,0.1)!important;"></td>
+                           <td><input type="number" class="form-control item-calc text-center" name="cantidad" value="1" style="background:rgba(255,255,255,0.05)!important; color:white!important; border:1px solid rgba(255,255,255,0.1)!important;"></td>
+                           <td><input type="number" class="form-control item-calc" name="precio" value="${p}" style="background:rgba(255,255,255,0.05)!important; color:white!important; border:1px solid rgba(255,255,255,0.1)!important;"></td>
+                           <td class="text-info fw-bold fs-5">$${p}</td>
+                           <td><button type="button" class="btn btn-sm btn-outline-danger border-0 remove-row"><i class="bi bi-trash"></i></button></td>`;
+            tb.appendChild(r);
             bootstrap.Modal.getInstance(document.getElementById('productosModal')).hide();
-            
-            // Trigger update
             const event = new Event('input', { bubbles: true });
-            newRow.querySelector('[name="cantidad"]').dispatchEvent(event);
+            r.querySelector('[name="cantidad"]').dispatchEvent(event);
         }
-
-        document.getElementById('search-productos').addEventListener('input', function(e) {
-            const term = e.target.value.toLowerCase();
-            const filtrados = productosData.filter(p => 
-                p.nombre.toLowerCase().includes(term) || 
-                p.descripcion.toLowerCase().includes(term)
-            );
-            renderProductos(filtrados);
-        });
-
-        document.getElementById('btn-guardar-producto').addEventListener('click', function() {
-            const form = document.getElementById('form-nuevo-producto');
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData);
-
-            fetch('/api/productos', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.status === 'ok') {
-                    alert('Producto creado');
-                    bootstrap.Modal.getInstance(document.getElementById('nuevoProductoModal')).hide();
-                    form.reset();
-                    cargarProductos();
-                }
-            });
-        });
-
         cargarProductos();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
     </script>
 </body>
 </html>

@@ -1,265 +1,691 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - BlueSky Energy</title>
-    <link rel="icon" type="image/jpg" href="{{ url_for('static', filename='img/logo.jpg') }}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root {
-            --bluesky-dark-blue: #0d2a42;
-            --bluesky-light-blue: #2cb0e8;
-        }
-        body {
-            background-color: #f8f9fa;
-        }
-        .navbar-brand img {
-            max-height: 40px;
-        }
-        .bg-primary { background-color: var(--bluesky-dark-blue) !important; }
-        .btn-primary { background-color: var(--bluesky-dark-blue); border-color: var(--bluesky-dark-blue); }
-        .btn-primary:hover { background-color: #0a2033; border-color: #0a2033; }
-        .text-primary { color: var(--bluesky-dark-blue) !important; }
-        
-        .stat-card {
-            background: white;
-            border-radius: 10px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-left: 4px solid var(--bluesky-light-blue);
-        }
-        .stat-card.success { border-left-color: #28a745; }
-        .stat-card.danger { border-left-color: #dc3545; }
-        .stat-card.warning { border-left-color: #ffc107; }
-        .stat-card h2 {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin: 0;
-            color: var(--bluesky-dark-blue);
-        }
-        .stat-card p {
-            margin: 0;
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-        .stat-card .icon {
-            font-size: 3rem;
-            opacity: 0.2;
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-        .chart-container {
-            background: white;
-            border-radius: 10px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlueSky Energy — Panel de Control</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo 1.2.png') }}">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:    #07090f;
+  --card:  #0e1520;
+  --bdr:   rgba(255,255,255,0.07);
+  --bdr2:  rgba(255,255,255,0.03);
+  --text:  #f0f4ff;
+  --sub:   #7a8899;
+  --dim:   #33404f;
+  --blue:  #4f9eff;
+  --cyan:  #00d4ff;
+  --green: #00e5a0;
+  --amber: #f5a623;
+  --red:   #ff4d6a;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Outfit', sans-serif; font-size: 16px; line-height: 1.5;
+  overflow-x: hidden; min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+#bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.78; }
+
+.shell { position: relative; z-index: 2; display: flex; min-height: 100vh; }
+
+/* ──────────────────── SIDEBAR ──────────────────── */
+.sidebar {
+  width: 72px; position: fixed; left: 0; top: 0; bottom: 0;
+  background: rgba(8,11,18,0.95); backdrop-filter: blur(28px);
+  border-right: 1px solid var(--bdr);
+  display: flex; flex-direction: column; align-items: center;
+  padding: 28px 0; z-index: 100;
+  transition: width 0.36s cubic-bezier(.22,1,.36,1);
+}
+.sidebar:hover { width: 240px; }
+
+.sb-logo {
+  width: 100%; display: flex; align-items: center;
+  gap: 14px; padding: 0 20px;
+  margin-bottom: 40px; overflow: hidden;
+}
+.sb-mark {
+  width: 36px; height: 36px; flex-shrink: 0;
+  border-radius: 9px; background: var(--blue);
+  display: grid; place-items: center;
+}
+.sb-mark svg { width: 17px; height: 17px; fill: none; stroke: #fff; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.sb-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px; letter-spacing: 0.14em;
+  color: var(--text); white-space: nowrap;
+  opacity: 0; transition: opacity 0.2s 0.08s;
+}
+.sidebar:hover .sb-name { opacity: 1; }
+
+.nav-group { width: 100%; display: flex; flex-direction: column; gap: 2px; }
+.nav-link {
+  width: 100%; display: flex; align-items: center;
+  gap: 16px; padding: 14px 20px;
+  text-decoration: none; color: var(--sub);
+  font-size: 15px; font-weight: 400;
+  transition: all 0.15s; white-space: nowrap; overflow: hidden;
+  border-left: 2px solid transparent;
+}
+.nav-link.active { color: var(--text); border-left-color: var(--blue); background: rgba(79,158,255,0.08); }
+.nav-link:hover:not(.active) { color: var(--text); background: rgba(255,255,255,0.04); }
+.nav-ico { width: 24px; flex-shrink: 0; display: grid; place-items: center; }
+.nav-ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.nav-txt { opacity: 0; transition: opacity 0.2s 0.08s; }
+.sidebar:hover .nav-txt { opacity: 1; }
+.sb-gap { flex: 1; }
+
+/* ──────────────────── MAIN ──────────────────── */
+.main { margin-left: 72px; flex: 1; padding: 0 52px 120px; max-width: 1500px; }
+
+/* ──────────────────── TOPBAR ──────────────────── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 40px 0 48px;
+  position: sticky; top: 0;
+  background: linear-gradient(to bottom, var(--bg) 70%, transparent);
+  z-index: 50;
+}
+.tb-section {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px; letter-spacing: 0.26em;
+  color: var(--dim); margin-bottom: 6px;
+}
+.tb-title { font-size: 26px; font-weight: 600; color: var(--text); letter-spacing: -0.02em; }
+.tb-right { display: flex; align-items: center; gap: 14px; }
+
+.live-chip {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(0,229,160,0.06); border: 1px solid rgba(0,229,160,0.15);
+  border-radius: 100px; padding: 8px 18px;
+  font-size: 13px; font-weight: 600;
+  color: var(--green); letter-spacing: 0.05em; text-transform: uppercase;
+}
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: blink 2.4s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+.ava {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--blue); display: grid; place-items: center;
+  font-family: 'Bebas Neue', sans-serif; font-size: 15px;
+  letter-spacing: 0.08em; color: #fff; cursor: pointer;
+  border: 1px solid rgba(79,158,255,0.35);
+}
+
+/* ──────────────────── SECTION LABEL ──────────────────── */
+.slabel {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px; letter-spacing: 0.28em;
+  color: var(--dim); margin-bottom: 20px; padding-left: 2px;
+}
+
+/* ──────────────────── KPI GRID ──────────────────── */
+.kpi-grid {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 18px; margin-bottom: 52px;
+}
+.kpi-card {
+  background: var(--card); border: 1px solid var(--bdr);
+  border-radius: 20px; padding: 32px;
+  position: relative; overflow: hidden;
+  transition: border-color 0.22s, transform 0.25s cubic-bezier(.22,1,.36,1);
+}
+.kpi-card:hover { transform: translateY(-4px); }
+.kpi-card:hover.k1 { border-color: rgba(79,158,255,0.3); }
+.kpi-card:hover.k2 { border-color: rgba(0,229,160,0.25); }
+.kpi-card:hover.k3 { border-color: rgba(0,212,255,0.25); }
+.kpi-card:hover.k4 { border-color: rgba(245,166,35,0.25); }
+.kpi-card::after {
+  content: ''; position: absolute; top: 0; left: 20px; right: 20px;
+  height: 1px; opacity: 0; transition: opacity 0.22s;
+}
+.kpi-card:hover::after { opacity: 1; }
+.k1::after { background: linear-gradient(90deg, transparent, var(--blue), transparent); }
+.k2::after { background: linear-gradient(90deg, transparent, var(--green), transparent); }
+.k3::after { background: linear-gradient(90deg, transparent, var(--cyan), transparent); }
+.k4::after { background: linear-gradient(90deg, transparent, var(--amber), transparent); }
+
+.kpi-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+.kpi-ico { width: 48px; height: 48px; border-radius: 13px; display: grid; place-items: center; }
+.k1 .kpi-ico { background: rgba(79,158,255,0.12); }
+.k2 .kpi-ico { background: rgba(0,229,160,0.12); }
+.k3 .kpi-ico { background: rgba(0,212,255,0.12); }
+.k4 .kpi-ico { background: rgba(245,166,35,0.12); }
+.kpi-ico svg { width: 22px; height: 22px; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.k1 .kpi-ico svg { stroke: var(--blue); }
+.k2 .kpi-ico svg { stroke: var(--green); }
+.k3 .kpi-ico svg { stroke: var(--cyan); }
+.k4 .kpi-ico svg { stroke: var(--amber); }
+
+.kpi-tag {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px; letter-spacing: 0.1em;
+  padding: 5px 12px; border-radius: 6px;
+  background: rgba(255,255,255,0.05); color: var(--sub);
+}
+
+.kpi-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 54px; letter-spacing: 0.01em;
+  line-height: 1; color: var(--text); margin-bottom: 10px;
+}
+.kpi-lbl { font-size: 15px; font-weight: 400; color: var(--sub); }
+.kpi-track { height: 1px; background: var(--bdr2); margin-top: 28px; overflow: hidden; }
+.kpi-fill { height: 100%; width: 0; transition: width 2s cubic-bezier(.22,1,.36,1); }
+.k1 .kpi-fill { background: var(--blue); }
+.k2 .kpi-fill { background: var(--green); }
+.k3 .kpi-fill { background: var(--cyan); }
+.k4 .kpi-fill { background: var(--amber); }
+
+/* ──────────────────── PANELS ──────────────────── */
+.charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 52px; }
+.bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+
+.panel {
+  background: var(--card); border: 1px solid var(--bdr);
+  border-radius: 20px; padding: 36px;
+}
+.panel-head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding-bottom: 24px; border-bottom: 1px solid var(--bdr2); margin-bottom: 30px;
+}
+.panel-title { font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 6px; letter-spacing: -0.01em; }
+.panel-sub { font-size: 14px; color: var(--sub); }
+.panel-tag {
+  font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 0.14em;
+  padding: 6px 14px; border-radius: 6px;
+  background: rgba(79,158,255,0.07); border: 1px solid rgba(79,158,255,0.14); color: var(--blue);
+}
+
+/* Donut */
+.donut-wrap { display: grid; place-items: center; margin-bottom: 24px; }
+.leg-stack { display: flex; flex-direction: column; gap: 14px; }
+.leg-row { display: flex; align-items: center; justify-content: space-between; }
+.leg-left { display: flex; align-items: center; gap: 10px; }
+.leg-line { width: 16px; height: 2px; border-radius: 1px; flex-shrink: 0; }
+.leg-name { font-size: 14px; color: var(--sub); }
+.leg-num { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 0.05em; color: var(--text); }
+
+/* ──────────────────── TABLE ──────────────────── */
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 0.18em;
+  color: var(--dim); text-align: left; padding: 0 0 18px;
+  border-bottom: 1px solid var(--bdr);
+}
+tbody td {
+  padding: 18px 0; font-size: 15px;
+  border-bottom: 1px solid var(--bdr2); vertical-align: middle;
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr { transition: background 0.1s; }
+tbody tr:hover td { background: rgba(255,255,255,0.02); }
+
+.sbadge {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 500; padding: 5px 13px; border-radius: 6px;
+}
+.sb-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.sb-g { background: rgba(0,229,160,0.08); color: var(--green); }
+.sb-a { background: rgba(245,166,35,0.08); color: var(--amber); }
+.sb-b { background: rgba(79,158,255,0.08); color: var(--blue); }
+.sb-r { background: rgba(255,77,106,0.08); color: var(--red); }
+
+.link-all {
+  font-size: 14px; font-weight: 500; color: var(--blue);
+  text-decoration: none; display: flex; align-items: center; gap: 6px;
+  opacity: 0.75; transition: opacity 0.15s;
+}
+.link-all:hover { opacity: 1; }
+.link-all svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ──────────────────── ESTADO LIST ──────────────────── */
+.estado-item { display: flex; align-items: center; gap: 18px; padding: 20px 0; border-bottom: 1px solid var(--bdr2); }
+.estado-item:last-child { border-bottom: none; }
+.estado-ico { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0; }
+.estado-ico svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.estado-body { flex: 1; }
+.estado-name { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 10px; }
+.estado-track { height: 2px; background: var(--bdr); overflow: hidden; border-radius: 1px; }
+.estado-bar { height: 100%; width: 0; transition: width 1.8s 0.5s cubic-bezier(.22,1,.36,1); border-radius: 1px; }
+.estado-num { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 0.04em; color: var(--text); }
+
+/* ──────────────────── LOADER ──────────────────── */
+.loader {
+  position: fixed; inset: 0; background: var(--bg); z-index: 9999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+}
+.loader-name {
+  font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.32em;
+  color: var(--sub); text-transform: uppercase;
+}
+.loader-bar { width: 130px; height: 1px; background: var(--bdr); overflow: hidden; }
+.loader-fill { height: 100%; background: var(--blue); width: 0; animation: lp 1.4s ease forwards; }
+@keyframes lp { to { width: 100%; } }
+
+/* ──────────────────── MOBILE NAV ──────────────────── */
+.mobile-nav {
+  display: none; position: fixed; bottom: 0; left: 0; right: 0;
+  height: 68px; z-index: 200;
+  background: rgba(8,11,18,0.97); backdrop-filter: blur(24px);
+  border-top: 1px solid var(--bdr);
+  align-items: center; justify-content: space-around; padding: 0 8px;
+}
+.mnav-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1;
+  text-decoration: none; color: var(--dim);
+  font-size: 11px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase;
+  padding: 8px 4px; transition: color 0.15s;
+}
+.mnav-btn.active { color: var(--blue); }
+.mnav-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+.empty-msg { padding: 32px 0; text-align: center; color: var(--dim); font-size: 15px; }
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 2px; }
+
+/* ──────────────────── RESPONSIVE ──────────────────── */
+@media (max-width: 1300px) {
+  .kpi-grid { grid-template-columns: repeat(2,1fr); }
+}
+@media (max-width: 1000px) {
+  .charts-row { grid-template-columns: 1fr; }
+  .bottom-row  { grid-template-columns: 1fr; }
+  .main { padding: 0 32px 120px; }
+}
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .mobile-nav { display: flex; }
+  .main { margin-left: 0; padding: 0 22px 80px; }
+  .topbar { padding: 26px 0 30px; }
+  .tb-title { font-size: 22px; }
+  .kpi-grid { gap: 14px; margin-bottom: 36px; }
+  .kpi-val { font-size: 42px; }
+  .kpi-card { padding: 24px; }
+  .panel { padding: 24px; }
+  .charts-row, .bottom-row { gap: 14px; margin-bottom: 36px; }
+  .estado-num { font-size: 28px; }
+}
+@media (max-width: 520px) {
+  .main { padding: 0 16px 80px; }
+  .kpi-grid { grid-template-columns: 1fr; gap: 12px; }
+  .live-chip { display: none; }
+  .kpi-val { font-size: 38px; }
+  .kpi-card { padding: 22px; border-radius: 16px; }
+  .panel { border-radius: 16px; padding: 20px; }
+  tbody td { font-size: 14px; }
+}
+</style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="/">
-                <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="BlueSky Energy Logo" class="me-2">
-                <span class="fs-5">BlueSky Energy</span>
-            </a>
-            <div class="d-flex gap-2">
-                <a href="/dashboard" class="btn btn-light">
-                    <i class="bi bi-speedometer2"></i> Dashboard
-                </a>
-                <a href="/cotizaciones" class="btn btn-outline-light">
-                    <i class="bi bi-list-ul"></i> Cotizaciones
-                </a>
-                <a href="/clientes" class="btn btn-outline-light">
-                    <i class="bi bi-people"></i> Clientes
-                </a>
-                <a href="/" class="btn btn-outline-light">
-                    <i class="bi bi-plus-circle"></i> Nueva
-                </a>
-            </div>
-        </div>
+
+<div class="loader" id="loader">
+  <div class="loader-name">BlueSky Energy</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+</div>
+
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <img src="{{ url_for('static', filename='img/logo 1.2.png') }}" alt="Logo" style="height: 32px; width: auto;" class="me-2">
+      <span class="sb-name">BlueSky Energy</span>
+    </div>
+    <nav class="nav-group">
+      <a href="/dashboard" class="nav-link active">
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+        <span class="nav-txt">Dashboard</span>
+      </a>
+      <a href="/" class="nav-link">
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+        <span class="nav-txt">Nueva Cotización</span>
+      </a>
+      <a href="/cotizaciones" class="nav-link">
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+        <span class="nav-txt">Cotizaciones</span>
+      </a>
+      <a href="/clientes" class="nav-link">
+        <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+        <span class="nav-txt">Clientes</span>
+      </a>
     </nav>
+    <div class="sb-gap"></div>
+  </aside>
 
-    <div class="container mt-4 mb-5">
-        <h2 class="mb-4"><i class="bi bi-speedometer2"></i> Dashboard de Ventas</h2>
+  <!-- MAIN -->
+  <main class="main">
 
-        <!-- ESTADÍSTICAS PRINCIPALES -->
-        <div class="row g-4 mb-4" id="stats-container">
-            <div class="col-md-3">
-                <div class="stat-card position-relative">
-                    <i class="bi bi-file-text icon"></i>
-                    <h2 id="stat-total">0</h2>
-                    <p>Total Cotizaciones</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card success position-relative">
-                    <i class="bi bi-currency-dollar icon"></i>
-                    <h2 id="stat-monto">$0</h2>
-                    <p>Monto Total</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card warning position-relative">
-                    <i class="bi bi-graph-up icon"></i>
-                    <h2 id="stat-promedio">$0</h2>
-                    <p>Promedio</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card danger position-relative">
-                    <i class="bi bi-check-circle icon"></i>
-                    <h2 id="stat-aprobadas">0</h2>
-                    <p>Aprobadas</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- GRÁFICOS -->
-        <div class="row">
-            <div class="col-md-8">
-                <div class="chart-container">
-                    <h5 class="mb-3">Cotizaciones por Mes</h5>
-                    <canvas id="chartPorMes"></canvas>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="chart-container">
-                    <h5 class="mb-3">Estado de Cotizaciones</h5>
-                    <canvas id="chartPorEstado"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- ÚLTIMAS COTIZACIONES -->
-        <div class="chart-container">
-            <h5 class="mb-3">Últimas Cotizaciones</h5>
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Nº</th>
-                            <th>Cliente</th>
-                            <th>Fecha</th>
-                            <th>Total</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ultimas-cotizaciones"></tbody>
-                </table>
-            </div>
-        </div>
+    <div class="topbar">
+      <div>
+        <div class="tb-section">Sistema de Gestión / Panel Principal</div>
+        <div class="tb-title">Resumen Operacional</div>
+      </div>
+      <div class="tb-right">
+        <div class="live-chip"><div class="live-dot"></div>Sistema activo</div>
+        <div class="ava">BE</div>
+      </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function formatCurrency(value) {
-            return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }).format(value);
+    <!-- KPIs -->
+    <div class="slabel">Indicadores clave de rendimiento</div>
+    <section class="kpi-grid" id="s-kpis">
+      <div class="kpi-card k1">
+        <div class="kpi-head">
+          <div class="kpi-ico"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+          <span class="kpi-tag" id="tag1">—</span>
+        </div>
+        <div class="kpi-val" id="kv1">—</div>
+        <div class="kpi-lbl">Monto total facturado</div>
+        <div class="kpi-track"><div class="kpi-fill" id="kf1"></div></div>
+      </div>
+      <div class="kpi-card k2">
+        <div class="kpi-head">
+          <div class="kpi-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          <span class="kpi-tag" id="tag2">—</span>
+        </div>
+        <div class="kpi-val" id="kv2">—</div>
+        <div class="kpi-lbl">Cotizaciones emitidas</div>
+        <div class="kpi-track"><div class="kpi-fill" id="kf2"></div></div>
+      </div>
+      <div class="kpi-card k3">
+        <div class="kpi-head">
+          <div class="kpi-ico"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <span class="kpi-tag" id="tag3">—</span>
+        </div>
+        <div class="kpi-val" id="kv3">—</div>
+        <div class="kpi-lbl">Cotizaciones aprobadas</div>
+        <div class="kpi-track"><div class="kpi-fill" id="kf3"></div></div>
+      </div>
+      <div class="kpi-card k4">
+        <div class="kpi-head">
+          <div class="kpi-ico"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+          <span class="kpi-tag">Promedio</span>
+        </div>
+        <div class="kpi-val" id="kv4">—</div>
+        <div class="kpi-lbl">Valor promedio por cotización</div>
+        <div class="kpi-track"><div class="kpi-fill" id="kf4"></div></div>
+      </div>
+    </section>
+
+    <!-- CHARTS -->
+    <div class="slabel">Análisis de actividad</div>
+    <section class="charts-row" id="s-charts">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Cotizaciones por período</div>
+            <div class="panel-sub">Volumen mensual de los últimos registros</div>
+          </div>
+          <span class="panel-tag" id="pt-year">2026</span>
+        </div>
+        <canvas id="lineChart" height="220"></canvas>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Distribución por estado</div>
+            <div class="panel-sub">Composición del portafolio actual</div>
+          </div>
+        </div>
+        <div class="donut-wrap"><canvas id="donutChart" height="200"></canvas></div>
+        <div class="leg-stack" id="donut-leg"></div>
+      </div>
+    </section>
+
+    <!-- BOTTOM -->
+    <div class="slabel">Detalle operacional</div>
+    <section class="bottom-row" id="s-bottom">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Últimas cotizaciones</div>
+            <div class="panel-sub">Registros más recientes del sistema</div>
+          </div>
+          <a href="/cotizaciones" class="link-all">
+            Ver todo <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+        <table>
+          <thead><tr><th>N°</th><th>Cliente</th><th>Monto</th><th>Estado</th></tr></thead>
+          <tbody id="q-tbody"><tr><td colspan="4" class="empty-msg">Cargando…</td></tr></tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Estados del portafolio</div>
+            <div class="panel-sub">Conteo y proporción por categoría</div>
+          </div>
+        </div>
+        <div id="e-list"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav">
+  <a href="/dashboard" class="mnav-btn active">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Panel
+  </a>
+  <a href="/" class="mnav-btn">
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+    Nueva
+  </a>
+  <a href="/cotizaciones" class="mnav-btn">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    Cotizaciones
+  </a>
+  <a href="/clientes" class="mnav-btn">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+    Clientes
+  </a>
+</nav>
+
+<canvas id="bg-canvas"></canvas>
+
+<script>
+// ── THREE.JS ──
+(function(){
+  const c = document.getElementById('bg-canvas');
+  const r = new THREE.WebGLRenderer({canvas:c, alpha:true, antialias:true});
+  r.setPixelRatio(Math.min(devicePixelRatio, 2));
+  r.setSize(innerWidth, innerHeight);
+  const scene = new THREE.Scene();
+  const cam = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 100);
+  cam.position.z = 5;
+
+  // Partículas coloridas y grandes
+  const N = 1200;
+  const pos = new Float32Array(N*3);
+  const col = new Float32Array(N*3);
+  const palette = [
+    new THREE.Color('#4f9eff'),
+    new THREE.Color('#00e5a0'),
+    new THREE.Color('#00d4ff'),
+    new THREE.Color('#f5a623'),
+  ];
+  for(let i = 0; i < N; i++){
+    pos[i*3]   = (Math.random()-.5)*24;
+    pos[i*3+1] = (Math.random()-.5)*24;
+    pos[i*3+2] = (Math.random()-.5)*10;
+    const clr = palette[Math.floor(Math.random()*palette.length)];
+    col[i*3]=clr.r; col[i*3+1]=clr.g; col[i*3+2]=clr.b;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('color',    new THREE.BufferAttribute(col,3));
+  const pts = new THREE.Points(geo, new THREE.PointsMaterial({
+    size: 0.055, vertexColors: true, transparent: true, opacity: 0.85
+  }));
+  scene.add(pts);
+
+  // Grilla
+  const lm = new THREE.LineBasicMaterial({color:0x0f1e35, transparent:true, opacity:0.45});
+  for(let i=-10; i<=10; i+=2){
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-14,i*.75,-2),new THREE.Vector3(14,i*.75,-2)]),lm));
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(i,-10,-2),new THREE.Vector3(i,10,-2)]),lm));
+  }
+
+  // Anillos orbitales
+  const r1 = new THREE.Mesh(new THREE.RingGeometry(2.5,2.52,80), new THREE.MeshBasicMaterial({color:0x4f9eff, side:THREE.DoubleSide, transparent:true, opacity:0.14}));
+  const r2 = new THREE.Mesh(new THREE.RingGeometry(4.0,4.02,80), new THREE.MeshBasicMaterial({color:0x00e5a0, side:THREE.DoubleSide, transparent:true, opacity:0.09}));
+  r1.rotation.x = Math.PI/3; r2.rotation.x = Math.PI/4; r2.rotation.y = Math.PI/6;
+  scene.add(r1); scene.add(r2);
+
+  let mx=0, my=0;
+  addEventListener('mousemove', e => { mx=(e.clientX/innerWidth-.5)*.5; my=-(e.clientY/innerHeight-.5)*.5; });
+  addEventListener('resize', () => { cam.aspect=innerWidth/innerHeight; cam.updateProjectionMatrix(); r.setSize(innerWidth,innerHeight); });
+
+  let t=0;
+  (function tick(){
+    requestAnimationFrame(tick); t+=.003;
+    pts.rotation.y = t*.06+mx*.8; pts.rotation.x = my*.4;
+    r1.rotation.z = t*.2; r2.rotation.z = -t*.12; r1.rotation.y = t*.08;
+    cam.position.x += (mx*.6-cam.position.x)*.04;
+    cam.position.y += (my*.6-cam.position.y)*.04;
+    r.render(scene,cam);
+  })();
+})();
+
+// ── GSAP ──
+gsap.registerPlugin(ScrollTrigger);
+window.addEventListener('load', () => {
+  gsap.to('#loader', {opacity:0, duration:.5, delay:1.3, onComplete:()=>document.getElementById('loader').style.display='none'});
+  gsap.from('.topbar',    {y:-16, opacity:0, duration:.6, delay:1.5, ease:'power3.out'});
+  gsap.from('.kpi-card',  {y:26,  opacity:0, duration:.55, stagger:.08, delay:1.65, ease:'power3.out', onComplete:loadData});
+  gsap.from('.charts-row .panel', {y:26, opacity:0, duration:.6, stagger:.1, ease:'power3.out', scrollTrigger:{trigger:'#s-charts', start:'top 90%', once:true}});
+  gsap.from('.bottom-row .panel', {y:26, opacity:0, duration:.6, stagger:.1, ease:'power3.out', scrollTrigger:{trigger:'#s-bottom', start:'top 90%', once:true}});
+});
+
+// ── HELPERS ──
+function money(n){ return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:0,maximumFractionDigits:0}).format(n); }
+function animN(el,end,fmt){ let o={v:0}; gsap.to(o,{v:end, duration:1.9, ease:'power2.out', onUpdate:()=>el.textContent=fmt(o.v)}); }
+function setBar(id,pct){ setTimeout(()=>{ const b=document.getElementById(id); if(b) b.style.width=Math.min(pct,97)+'%'; },350); }
+
+const EST = {
+  'Aprobada':   {cls:'sb-g', color:'#00e5a0', ico:'<polyline points="20 6 9 17 4 12"/>'},
+  'Pendiente':  {cls:'sb-a', color:'#f5a623', ico:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'},
+  'En Revisión':{cls:'sb-b', color:'#4f9eff', ico:'<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>'},
+  'Rechazada':  {cls:'sb-r', color:'#ff4d6a', ico:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'},
+};
+
+async function loadData(){
+  try{
+    const [sR,qR] = await Promise.all([fetch('/api/estadisticas'), fetch('/api/cotizaciones')]);
+    const stats=await sR.json(), quotes=await qR.json();
+    if(stats.status!=='ok') return;
+
+    const total=stats.total_cotizaciones||0, monto=stats.monto_total||0, avg=stats.promedio||0;
+    const apr=stats.por_estado['Aprobada']||0, pen=stats.por_estado['Pendiente']||0;
+    const rev=stats.por_estado['En Revisión']||0, rec=stats.por_estado['Rechazada']||0;
+    const tasa = total>0 ? Math.round((apr/total)*100) : 0;
+
+    document.getElementById('pt-year').textContent = new Date().getFullYear();
+    document.getElementById('tag1').textContent = apr+' aprobadas';
+    document.getElementById('tag2').textContent = 'Este período';
+    document.getElementById('tag3').textContent = tasa+'% tasa';
+
+    animN(document.getElementById('kv1'), monto, n=>money(n));
+    animN(document.getElementById('kv2'), total, n=>Math.round(n).toString());
+    animN(document.getElementById('kv3'), apr,   n=>Math.round(n).toString());
+    animN(document.getElementById('kv4'), avg,   n=>money(n));
+
+    setBar('kf1', monto>0?82:0); setBar('kf2', Math.min(total*3,92));
+    setBar('kf3', tasa); setBar('kf4', 65);
+
+    // Línea
+    const meses=Object.keys(stats.por_mes), vals=Object.values(stats.por_mes);
+    const nm=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const labels=meses.map(m=>{ const[y,mo]=m.split('-'); return nm[parseInt(mo)-1]+" '"+y.slice(2); });
+    const ctx1=document.getElementById('lineChart').getContext('2d');
+    const g=ctx1.createLinearGradient(0,0,0,220);
+    g.addColorStop(0,'rgba(79,158,255,0.18)'); g.addColorStop(1,'rgba(79,158,255,0)');
+    new Chart(ctx1,{
+      type:'line',
+      data:{labels, datasets:[{data:vals, borderColor:'#4f9eff', borderWidth:2, backgroundColor:g, fill:true, tension:0.4, pointBackgroundColor:'#4f9eff', pointBorderColor:'#0e1520', pointBorderWidth:2, pointRadius:5, pointHoverRadius:8}]},
+      options:{responsive:true, interaction:{mode:'index',intersect:false},
+        plugins:{legend:{display:false}, tooltip:{backgroundColor:'#0e1520', borderColor:'rgba(79,158,255,0.2)', borderWidth:1, titleColor:'#7a8899', bodyColor:'#f0f4ff', padding:14, cornerRadius:10, titleFont:{family:'Outfit',size:13}, bodyFont:{family:'Outfit',size:15,weight:'600'}, callbacks:{label:c=>'  '+c.parsed.y+' cotizaciones'}}},
+        scales:{
+          x:{grid:{color:'rgba(255,255,255,0.03)'}, ticks:{color:'#33404f', font:{family:'Outfit',size:13}}, border:{color:'transparent'}},
+          y:{grid:{color:'rgba(255,255,255,0.03)'}, ticks:{color:'#33404f', font:{family:'Outfit',size:13}, stepSize:1}, border:{color:'transparent'}, beginAtZero:true}
         }
+      }
+    });
 
-        function getEstadoBadge(estado) {
-            const badges = {
-                'Pendiente': 'bg-warning',
-                'Aprobada': 'bg-success',
-                'Rechazada': 'bg-danger',
-                'En Revisión': 'bg-info'
-            };
-            return `<span class="badge ${badges[estado] || 'bg-secondary'}">${estado}</span>`;
-        }
+    // Donut
+    const dL=['Aprobada','Pendiente','En Revisión','Rechazada'];
+    const dV=[apr,pen,rev,rec];
+    const dC=['#00e5a0','#f5a623','#4f9eff','#ff4d6a'];
+    new Chart(document.getElementById('donutChart').getContext('2d'),{
+      type:'doughnut',
+      data:{labels:dL, datasets:[{data:dV, backgroundColor:dC.map(c=>c+'18'), borderColor:dC, borderWidth:2, hoverOffset:8}]},
+      options:{responsive:true, cutout:'74%', plugins:{legend:{display:false}, tooltip:{backgroundColor:'#0e1520', borderColor:'rgba(255,255,255,0.07)', borderWidth:1, titleColor:'#7a8899', bodyColor:'#f0f4ff', padding:14, cornerRadius:10, titleFont:{family:'Outfit',size:13}, bodyFont:{family:'Outfit',size:15,weight:'600'}, callbacks:{label:c=>'  '+c.parsed+' registros'}}}}
+    });
 
-        // Cargar estadísticas
-        fetch('/api/estadisticas')
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'ok') {
-                    document.getElementById('stat-total').textContent = data.total_cotizaciones;
-                    document.getElementById('stat-monto').textContent = formatCurrency(data.monto_total);
-                    document.getElementById('stat-promedio').textContent = formatCurrency(data.promedio);
-                    document.getElementById('stat-aprobadas').textContent = data.por_estado.Aprobada || 0;
+    // Leyenda donut
+    const leg=document.getElementById('donut-leg'); leg.innerHTML='';
+    dL.forEach((l,i)=>{ leg.innerHTML+=`<div class="leg-row"><div class="leg-left"><div class="leg-line" style="background:${dC[i]}"></div><span class="leg-name">${l}</span></div><span class="leg-num">${dV[i]}</span></div>`; });
 
-                    // Gráfico por mes
-                    const ctxMes = document.getElementById('chartPorMes').getContext('2d');
-                    new Chart(ctxMes, {
-                        type: 'line',
-                        data: {
-                            labels: Object.keys(data.por_mes),
-                            datasets: [{
-                                label: 'Cotizaciones',
-                                data: Object.values(data.por_mes),
-                                borderColor: '#2cb0e8',
-                                backgroundColor: 'rgba(44, 176, 232, 0.1)',
-                                tension: 0.4,
-                                fill: true
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            plugins: {
-                                legend: { display: false }
-                            },
-                            scales: {
-                                y: { beginAtZero: true }
-                            }
-                        }
-                    });
+    // Tabla
+    if(quotes.status==='ok'){
+      const tbody=document.getElementById('q-tbody');
+      const rows=quotes.cotizaciones.slice(0,6);
+      if(!rows.length){ tbody.innerHTML='<tr><td colspan="4" class="empty-msg">Sin registros</td></tr>'; }
+      else{
+        tbody.innerHTML='';
+        rows.forEach(q=>{
+          const e=q.estado||'Pendiente', info=EST[e]||EST['Pendiente'];
+          const num=String(q.quote_number||'—').padStart(3,'0');
+          tbody.innerHTML+=`<tr>
+            <td style="color:var(--dim);font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.08em">#${num}</td>
+            <td style="font-weight:500">${q.cliente||'—'}</td>
+            <td style="font-weight:600">${q.total||'$0'}</td>
+            <td><span class="sbadge ${info.cls}"><span class="sb-dot"></span>${e}</span></td>
+          </tr>`;
+        });
+      }
+    }
 
-                    // Gráfico por estado
-                    const ctxEstado = document.getElementById('chartPorEstado').getContext('2d');
-                    new Chart(ctxEstado, {
-                        type: 'doughnut',
-                        data: {
-                            labels: Object.keys(data.por_estado),
-                            datasets: [{
-                                data: Object.values(data.por_estado),
-                                backgroundColor: ['#ffc107', '#28a745', '#dc3545', '#17a2b8']
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            plugins: {
-                                legend: { position: 'bottom' }
-                            }
-                        }
-                    });
-                }
-            });
+    // Estados
+    const el=document.getElementById('e-list'); el.innerHTML='';
+    [{nombre:'Aprobadas',count:apr,e:'Aprobada'},{nombre:'Pendientes',count:pen,e:'Pendiente'},{nombre:'En Revisión',count:rev,e:'En Revisión'},{nombre:'Rechazadas',count:rec,e:'Rechazada'}]
+    .forEach((s,i)=>{
+      const pct=total>0?Math.round((s.count/total)*100):0;
+      const info=EST[s.e]; const bid='eb-'+i;
+      el.innerHTML+=`
+        <div class="estado-item">
+          <div class="estado-ico" style="background:${info.color}15;color:${info.color}">
+            <svg viewBox="0 0 24 24" stroke="${info.color}">${info.ico}</svg>
+          </div>
+          <div class="estado-body">
+            <div class="estado-name">${s.nombre} <span style="color:var(--dim);font-size:13px;margin-left:8px">${pct}%</span></div>
+            <div class="estado-track"><div class="estado-bar" id="${bid}" style="background:${info.color}"></div></div>
+          </div>
+          <div class="estado-num">${s.count}</div>
+        </div>`;
+      setTimeout(()=>{ const b=document.getElementById(bid); if(b) b.style.width=pct+'%'; }, 700+i*100);
+    });
 
-        // Cargar últimas cotizaciones
-        fetch('/api/cotizaciones')
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'ok') {
-                    const tbody = document.getElementById('ultimas-cotizaciones');
-                    data.cotizaciones.slice(0, 5).forEach(cot => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td><strong>#${String(cot.quote_number).padStart(3, '0')}</strong></td>
-                            <td>${cot.cliente}</td>
-                            <td>${cot.fecha}</td>
-                            <td><strong>${cot.total}</strong></td>
-                            <td>${getEstadoBadge(cot.estado)}</td>
-                            <td>
-                                <a href="/descargar-pdf/${cot.id}" target="_blank" class="btn btn-sm btn-danger">
-                                    <i class="bi bi-file-pdf"></i>
-                                </a>
-                            </td>
-                        `;
-                        tbody.appendChild(row);
-                    });
-                }
-            });
-    </script>
+  }catch(err){ console.error('Error:', err); }
+}
+</script>
 </body>
 </html>

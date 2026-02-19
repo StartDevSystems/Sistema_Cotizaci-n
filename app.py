@@ -272,8 +272,8 @@ def descargar_pdf(cotizacion_id):
         data['fecha_formateada'] = format_spanish_date(fecha_obj)
         data['fecha_validez'] = format_spanish_date(fecha_obj + datetime.timedelta(days=15))
         
-        # Ruta corregida para Docker y Render
-        logo_path = os.path.join(os.getcwd(), 'static', 'img', 'logo.jpg')
+        # Ruta corregida para el nuevo logo PNG
+        logo_path = os.path.join(os.getcwd(), 'static', 'img', 'logo 1.2.png')
         if os.path.exists(logo_path):
             data['logo_url'] = Path(logo_path).as_uri()
         else:
