@@ -5,48 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nueva Cotización - BlueSky Energy</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo 1.2.png') }}">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
     <style>
         :root {
-            --bg: #02040a;
-            --card: #0a0f1a;
-            --neon: #00d4ff;
+            --bg: #07090f;
+            --card: #0e1520;
+            --bdr: rgba(255,255,255,0.15);
+            --text: #f0f4ff;
             --blue: #4f9eff;
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.1);
+            --neon: #2cb0e8;
         }
 
         body {
             background: var(--bg) !important;
             color: #ffffff !important;
             font-family: 'Outfit', sans-serif;
+            font-size: 20px;
             margin: 0;
             overflow-x: hidden;
             min-height: 100vh;
-            color-scheme: dark; /* OBLIGA AL NAVEGADOR A USAR CONTROLES OSCUROS */
+            color-scheme: dark;
         }
 
-        /* FUERZA BRUTA PARA EL SELECT Y SUS OPCIONES */
-        select, option {
-            background-color: #0a0f1a !important;
-            color: white !important;
-        }
-
-        #three-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.6; }
+        #three-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.4; }
 
         .shell { position: relative; z-index: 2; display: flex; min-height: 100vh; }
 
-        /* SIDEBAR PREMIUM */
         .sidebar {
             width: 72px; position: fixed; left: 0; top: 0; bottom: 0;
-            background: rgba(5, 8, 15, 0.98); backdrop-filter: blur(30px);
-            border-right: 1px solid var(--border);
+            background: rgba(8,11,18,0.98); backdrop-filter: blur(30px);
+            border-right: 1px solid var(--bdr);
             display: flex; flex-direction: column; align-items: center;
             padding: 28px 0; z-index: 100;
             transition: width 0.3s cubic-bezier(.22,1,.36,1);
@@ -57,13 +54,13 @@
         .sidebar:hover .sb-name { opacity: 1; }
 
         .nav-link {
-            width: 100%; display: flex; align-items: center; gap: 16px; padding: 14px 20px;
-            text-decoration: none; color: #5c6b84; transition: 0.2s; white-space: nowrap; overflow: hidden;
+            width: 100%; display: flex; align-items: center; gap: 16px; padding: 18px 24px;
+            text-decoration: none; color: #7a8899; transition: 0.2s; white-space: nowrap; overflow: hidden;
         }
         .nav-link.active { color: #fff; background: rgba(79,158,255,0.1); border-left: 3px solid var(--blue); }
-        .nav-ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; }
+        .nav-ico { width: 28px; display: grid; place-items: center; }
+        .nav-ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; }
 
-        /* CENTRADO MAESTRO */
         .main-content { 
             flex: 1; 
             margin-left: 72px; 
@@ -74,98 +71,71 @@
         }
         
         .premium-card {
-            background: rgba(10, 15, 26, 0.8) !important;
-            backdrop-filter: blur(40px);
-            border: 1px solid var(--border) !important;
-            border-radius: 30px;
+            background: rgba(14, 21, 32, 0.85);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--bdr);
+            border-radius: 24px;
             padding: 50px;
             width: 100%;
-            max-width: 1100px;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+            max-width: 1200px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
         }
 
-        .section-title { 
-            font-family: 'Bebas Neue', sans-serif; 
-            font-size: 42px; 
-            color: var(--neon); 
-            text-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
-            margin-bottom: 40px;
-        }
+        .section-title { font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 0.05em; color: var(--blue); margin-bottom: 30px; }
 
         /* 🚨 TOTAL ANNIHILATION OF WHITE INPUTS 🚨 */
+        input, textarea, select, .form-control, .form-select {
+            background-color: #121520 !important; /* COLOR SÓLIDO OSCURO */
+            border: 1px solid var(--bdr) !important;
+            color: #ffffff !important;
+            border-radius: 12px !important;
+            padding: 18px 24px !important;
+            font-size: 18px !important;
+            transition: all 0.3s ease !important;
+        }
+
         .form-label { 
-            color: var(--blue) !important;
+            font-size: 14px !important;
             font-weight: 700 !important;
-            text-transform: uppercase;
-            font-size: 13px !important;
-            letter-spacing: 1.5px;
-            margin-bottom: 12px;
+            text-transform: uppercase !important; 
+            letter-spacing: 1.5px !important; 
+            color: var(--blue) !important;
+            margin-bottom: 12px !important; 
             display: block;
         }
 
-        input, select, textarea, .form-control, .form-select {
-            background-color: rgba(255, 255, 255, 0.04) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            color: #ffffff !important;
-            border-radius: 15px !important;
-            padding: 15px 20px !important;
-            font-size: 16px !important;
-        }
+        ::placeholder { color: rgba(255, 255, 255, 0.6) !important; } /* MÁS CLARO */
 
-        input:focus, select:focus, textarea:focus {
-            background-color: rgba(255, 255, 255, 0.07) !important;
-            border-color: var(--neon) !important;
-            box-shadow: 0 0 25px rgba(0, 212, 255, 0.2) !important;
-            outline: none !important;
-        }
-
-        ::placeholder { color: rgba(255, 255, 255, 0.2) !important; }
-
-        /* TABLA CRISTAL */
-        .table { --bs-table-bg: transparent !important; color: white !important; }
-        .table thead th { 
-            background: transparent !important;
-            color: var(--neon) !important;
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 20px;
-            border-bottom: 1px solid var(--border) !important;
-            padding-bottom: 15px;
-        }
-        .table td { 
-            background: transparent !important; 
-            border: none !important; 
-            padding: 12px 10px !important;
-        }
-
-        .btn-premium {
-            background: linear-gradient(135deg, #007bff, #00d4ff) !important;
-            border: none !important;
+        select option {
+            background-color: #0e1520 !important;
             color: white !important;
-            font-weight: 800;
-            border-radius: 15px;
-            padding: 20px 40px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: 0.4s;
-        }
-        .btn-premium:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 212, 255, 0.4);
         }
 
-        .total-box {
-            text-align: right;
-            padding: 20px;
+        .table { color: var(--text) !important; border-collapse: separate; border-spacing: 0 15px; }
+        .table thead th { 
+            font-family: 'Bebas Neue', sans-serif; 
+            color: var(--blue); 
+            border: none;
+            background: transparent !important;
+            letter-spacing: 1.5px;
+            font-size: 20px;
         }
-        .total-label { color: var(--neon); font-family: 'Bebas Neue', sans-serif; font-size: 20px; margin: 0; }
-        .total-val { font-family: 'Bebas Neue', sans-serif; font-size: 72px; color: white; line-height: 1; }
+        .table td { border: none !important; vertical-align: middle; }
+        
+        .btn-premium {
+            background: var(--blue) !important;
+            border: none; color: #fff !important; font-weight: 800; border-radius: 15px; padding: 20px 40px; transition: 0.4s;
+            text-transform: uppercase; letter-spacing: 2px; font-size: 18px;
+        }
+        .btn-premium:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(79, 158, 255, 0.4); }
 
-        /* Autocomplete */
+        .total-display { font-family: 'Bebas Neue', sans-serif; font-size: 82px; color: white; line-height: 1; }
+
         .autocomplete-items {
-            background: #0a0f1a; border: 1px solid var(--neon); border-radius: 15px;
-            position: absolute; width: 100%; z-index: 1000; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            background: #0e1520; border: 2px solid var(--blue); border-radius: 15px;
+            position: absolute; width: 100%; z-index: 1000; overflow: hidden;
         }
-        .autocomplete-items div { padding: 15px; cursor: pointer; border-bottom: 1px solid var(--border); }
+        .autocomplete-items div { padding: 18px; cursor: pointer; color: #fff; border-bottom: 1px solid var(--bdr); font-size: 18px; }
         .autocomplete-items div:hover { background: var(--blue); }
     </style>
 </head>
@@ -174,7 +144,6 @@
     <canvas id="three-canvas"></canvas>
 
     <div class="shell">
-        <!-- SIDEBAR -->
         <aside class="sidebar">
             <div class="sb-logo">
                 <img src="{{ url_for('static', filename='img/logo 1.2.png') }}" alt="Logo" style="height: 32px;">
@@ -182,19 +151,19 @@
             </div>
             <nav class="nav-group w-100">
                 <a href="/dashboard" class="nav-link">
-                    <span class="nav-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+                    <span class="nav-ico"><svg viewBox="0 0 24 24" style="stroke:currentColor; stroke-width:1.8; fill:none;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
                     <span class="sb-name">Dashboard</span>
                 </a>
                 <a href="/" class="nav-link active">
-                    <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></span>
+                    <span class="nav-ico"><svg viewBox="0 0 24 24" style="stroke:currentColor; stroke-width:1.8; fill:none;"><path d="M12 5v14M5 12h14"/></svg></span>
                     <span class="sb-name">Nueva Cotización</span>
                 </a>
                 <a href="/cotizaciones" class="nav-link">
-                    <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="2"/></svg></span>
+                    <span class="nav-ico"><svg viewBox="0 0 24 24" style="stroke:currentColor; stroke-width:1.8; fill:none;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
                     <span class="sb-name">Cotizaciones</span>
                 </a>
                 <a href="/clientes" class="nav-link">
-                    <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg></span>
+                    <span class="nav-ico"><svg viewBox="0 0 24 24" style="stroke:currentColor; stroke-width:1.8; fill:none;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>
                     <span class="sb-name">Clientes</span>
                 </a>
             </nav>
@@ -203,8 +172,8 @@
         <main class="main-content">
             <div class="premium-card">
                 <div class="d-flex justify-content-between align-items-center mb-5">
-                    <h1 class="section-title mb-0">Generar Cotización</h1>
-                    <button class="btn btn-outline-info btn-sm px-4" data-bs-toggle="modal" data-bs-target="#productosModal" style="border-radius: 12px; border-color: var(--border); color: #fff;">
+                    <h1 class="section-title mb-0">Emisión de Cotización</h1>
+                    <button class="btn btn-outline-info btn-sm px-4 py-2" data-bs-toggle="modal" data-bs-target="#productosModal" style="border-radius: 12px; border-color: var(--bdr); color: white;">
                         📂 CATÁLOGO
                     </button>
                 </div>
@@ -212,19 +181,19 @@
                 <form id="cotizacion-form">
                     <div class="row g-4 mb-5">
                         <div class="col-md-6">
-                            <label class="form-label">Cliente</label>
+                            <label class="form-label">Cliente Final</label>
                             <div class="position-relative">
-                                <input type="text" class="form-control" id="cliente" placeholder="Nombre del cliente..." required autocomplete="off" style="background: rgba(255,255,255,0.05)!important; color: white!important;">
+                                <input type="text" class="form-control" id="cliente" placeholder="Escribe para buscar..." required autocomplete="off" style="background-color: #121520 !important;">
                                 <div id="cliente-autocomplete" class="autocomplete-items"></div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Fecha</label>
-                            <input type="date" class="form-control" id="fecha" required style="background: rgba(255,255,255,0.05)!important; color: white!important;">
+                            <label class="form-label">Fecha Emisión</label>
+                            <input type="date" class="form-control" id="fecha" required style="background-color: #121520 !important;">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Estado</label>
-                            <select class="form-select" id="estado" style="background: rgba(255,255,255,0.05)!important; color: white!important;">
+                            <select class="form-select" id="estado" style="background-color: #121520 !important;">
                                 <option value="Pendiente">Pendiente</option>
                                 <option value="Aprobada">Aprobada</option>
                                 <option value="Rechazada">Rechazada</option>
@@ -233,20 +202,20 @@
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="section-title mb-0" style="font-size: 22px;">Conceptos</h5>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" id="add-row-btn" style="border-color: var(--border); color: #7a8899;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="section-title mb-0" style="font-size: 22px;">Conceptos Detallados</h5>
+                        <button type="button" class="btn btn-sm btn-outline-secondary px-3" id="add-row-btn" style="border-radius: 10px; border-color: var(--bdr); color: #7a8899;">
                             + AÑADIR FILA
                         </button>
                     </div>
 
-                    <div class="table-responsive">
+                    <div class="table-responsive mb-4">
                         <table class="table" id="items-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 50%;">DESCRIPCIÓN</th>
-                                    <th style="width: 10%;">CANT.</th>
-                                    <th style="width: 15%;">PRECIO</th>
+                                    <th style="width: 50%;">DESCRIPCIÓN DEL SERVICIO</th>
+                                    <th style="width: 10%; text-align: center;">CANT.</th>
+                                    <th style="width: 15%;">PRECIO UNIT.</th>
                                     <th style="width: 15%;">TOTAL</th>
                                     <th style="width: 5%;"></th>
                                 </tr>
@@ -256,23 +225,23 @@
                     </div>
 
                     <div class="row align-items-end mt-5">
-                        <div class="col-md-6">
-                            <label class="form-label">Notas</label>
-                            <textarea class="form-control" id="notas" rows="3" placeholder="Información adicional..." style="background: rgba(255,255,255,0.05)!important; color: white!important;"></textarea>
+                        <div class="col-md-7">
+                            <label class="form-label">Notas Adicionales</label>
+                            <textarea class="form-control" id="notas" rows="4" placeholder="Validez de oferta, condiciones..." style="background-color: #121520 !important;"></textarea>
                         </div>
-                        <div class="col-md-6 total-box">
-                            <p class="total-label">Inversión Estimada</p>
-                            <div class="total-val" id="total-general">$0.00</div>
+                        <div class="col-md-5 text-end">
+                            <p class="form-label mb-1">INVERSIÓN TOTAL ESTIMADA</p>
+                            <div class="total-display" id="total-general">$0.00</div>
                         </div>
                     </div>
 
                     <div class="text-center mt-5">
                         <button type="submit" class="btn btn-premium btn-lg w-100">
-                            🚀 PROCESAR Y GUARDAR COTIZACIÓN
+                            PROCESAR Y GUARDAR COTIZACIÓN
                         </button>
                         <div id="download-buttons-area" class="mt-4" style="display: none;">
-                            <a href="#" id="pdf-download-link" class="btn btn-danger btn-lg me-2" target="_blank"><i class="bi bi-file-pdf"></i></a>
-                            <a href="#" id="excel-download-link" class="btn btn-success btn-lg"><i class="bi bi-file-excel"></i></a>
+                            <a href="#" id="pdf-download-link" class="btn btn-danger btn-lg me-3" target="_blank" style="font-family: 'Bebas Neue'; padding: 15px 40px;">PDF</a>
+                            <a href="#" id="excel-download-link" class="btn btn-success btn-lg" style="font-family: 'Bebas Neue'; padding: 15px 40px;">EXCEL</a>
                         </div>
                     </div>
                 </form>
@@ -280,29 +249,30 @@
         </main>
     </div>
 
-    <!-- MODAL PRODUCTOS -->
+    <!-- MODAL CATÁLOGO -->
     <div class="modal fade" id="productosModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content" style="background: #0a0f1a; border: 1px solid var(--border); border-radius: 25px;">
-                <div class="modal-header border-0 p-4">
+            <div class="modal-content" style="background: #0e1520; border: 1px solid var(--bdr); border-radius: 24px;">
+                <div class="modal-header border-0 p-4 pb-0">
                     <h5 class="modal-title section-title" style="font-size: 28px; margin: 0;">Catálogo Maestro</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4 pt-0">
-                    <input type="text" class="form-control mb-4" id="search-productos" placeholder="Buscar producto..." style="background: rgba(255,255,255,0.05)!important; color: white!important;">
-                    <table class="table">
-                        <thead><tr><th>Producto</th><th>Precio</th><th></th></tr></thead>
-                        <tbody id="productos-tbody"></tbody>
-                    </table>
+                    <input type="text" class="form-control mb-4" id="search-productos" placeholder="Buscar producto..." style="background-color: #121520 !important;">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead><tr><th style="color: var(--blue);">PRODUCTO</th><th style="color: var(--blue);">PRECIO</th><th></th></tr></thead>
+                            <tbody id="productos-tbody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}?v=2.1"></script>
     <script>
-        // THREE.JS
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), alpha: true });
@@ -311,57 +281,10 @@
         const count = 60; const pos = new Float32Array(count*3);
         for(let i=0; i<count*3; i++) pos[i] = (Math.random()-0.5)*12;
         const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-        group.add(new THREE.Points(geo, new THREE.PointsMaterial({size: 0.12, color: '#00d4ff', transparent: true, opacity: 0.8})));
+        group.add(new THREE.Points(geo, new THREE.PointsMaterial({size: 0.1, color: '#4f9eff', transparent: true, opacity: 0.8})));
         camera.position.z = 5;
         function anim() { requestAnimationFrame(anim); group.rotation.y += 0.001; renderer.render(scene, camera); } anim();
-
-        // LÓGICA DE NEGOCIO
-        let clientesData = [];
-        fetch('/api/clientes').then(r => r.json()).then(d => { if(d.status==='ok') clientesData = d.clientes; });
-
-        const clienteInput = document.getElementById('cliente');
-        const autoDiv = document.getElementById('cliente-autocomplete');
-        clienteInput.addEventListener('input', function() {
-            const val = this.value.toLowerCase(); autoDiv.innerHTML = ''; if(!val) return;
-            clientesData.filter(c => c.nombre.toLowerCase().includes(val)).slice(0,5).forEach(c => {
-                const d = document.createElement('div'); d.innerHTML = `<b>${c.nombre}</b> <small style="opacity:0.5">${c.empresa || ''}</small>`;
-                d.onclick = () => { clienteInput.value = c.nombre; autoDiv.innerHTML = ''; };
-                autoDiv.appendChild(d);
-            });
-        });
-
-        function cargarProductos() {
-            fetch('/api/productos').then(r => r.json()).then(d => {
-                const tb = document.getElementById('productos-tbody'); tb.innerHTML = '';
-                d.productos.forEach(p => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `<td style="color:white"><b>${p.nombre}</b></td>
-                                     <td style="color:var(--neon); font-weight:bold">$${p.precio}</td>
-                                     <td><button class="btn btn-sm btn-info text-dark fw-bold" onclick="agregarProducto('${p.nombre}', '${p.descripcion}', ${p.precio})" style="border-radius:8px">AÑADIR</button></td>`;
-                    tb.appendChild(row);
-                });
-            });
-        }
-        function agregarProducto(n, d, p) {
-            const tb = document.getElementById('items-tbody');
-            const r = document.createElement('tr');
-            r.innerHTML = `<td><input type="text" class="form-control" name="descripcion" value="${d}" style="background:rgba(255,255,255,0.05)!important; color:white!important; border:1px solid rgba(255,255,255,0.1)!important;"></td>
-                           <td><input type="number" class="form-control item-calc text-center" name="cantidad" value="1" style="background:rgba(255,255,255,0.05)!important; color:white!important; border:1px solid rgba(255,255,255,0.1)!important;"></td>
-                           <td><input type="number" class="form-control item-calc" name="precio" value="${p}" style="background:rgba(255,255,255,0.05)!important; color:white!important; border:1px solid rgba(255,255,255,0.1)!important;"></td>
-                           <td class="text-info fw-bold fs-5">$${p}</td>
-                           <td><button type="button" class="btn btn-sm btn-outline-danger border-0 remove-row"><i class="bi bi-trash"></i></button></td>`;
-            tb.appendChild(r);
-            bootstrap.Modal.getInstance(document.getElementById('productosModal')).hide();
-            const event = new Event('input', { bubbles: true });
-            r.querySelector('[name="cantidad"]').dispatchEvent(event);
-        }
-        cargarProductos();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
     </script>
 </body>
 </html>

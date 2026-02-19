@@ -13,21 +13,26 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function hideDownloadButtons() {
-        downloadButtonsArea.style.display = 'none';
+        if (downloadButtonsArea) downloadButtonsArea.style.display = 'none';
     }
 
     function showDownloadButtons() {
-        downloadButtonsArea.style.display = 'inline-block';
+        if (downloadButtonsArea) downloadButtonsArea.style.display = 'block';
     }
 
     function updateTotals() {
         hideDownloadButtons();
         let totalGeneral = 0;
         tableBody.querySelectorAll('tr').forEach(row => {
-            const cantidad = parseFloat(row.querySelector('[name="cantidad"]').value) || 0;
-            const precio = parseFloat(row.querySelector('[name="precio"]').value) || 0;
+            const cantidadInput = row.querySelector('[name="cantidad"]');
+            const precioInput = row.querySelector('[name="precio"]');
+            const totalCol = row.querySelector('.total-col');
+            
+            const cantidad = parseFloat(cantidadInput.value) || 0;
+            const precio = parseFloat(precioInput.value) || 0;
             const totalFila = cantidad * precio;
-            row.querySelector('.item-total').value = formatCurrency(totalFila);
+            
+            if (totalCol) totalCol.textContent = formatCurrency(totalFila);
             totalGeneral += totalFila;
         });
         document.getElementById('total-general').textContent = formatCurrency(totalGeneral);
@@ -39,43 +44,53 @@ document.addEventListener('DOMContentLoaded', function () {
 
     tableBody.addEventListener('click', function(e) {
         if (e.target.closest('.remove-row')) {
-            if (tableBody.querySelectorAll('tr').length > 1) {
+            const rows = tableBody.querySelectorAll('tr');
+            if (rows.length > 1) {
                 e.target.closest('tr').remove();
                 updateTotals();
             }
         }
     });
 
-    function createFirstRow() {
-        hideDownloadButtons();
-        const firstRowHTML = `
-            <tr>
-                <td><input type="text" class="form-control" name="descripcion" placeholder="Descripción del servicio o producto"></td>
-                <td><input type="number" class="form-control item-calc" name="cantidad" value="1" min="1"></td>
-                <td><input type="number" class="form-control item-calc" name="precio" placeholder="0.00" step="0.01" min="0"></td>
-                <td><input type="text" class="form-control item-total" readonly value="$0.00"></td>
-                <td><button type="button" class="btn btn-danger btn-sm remove-row"><i class="bi bi-trash"></i></button></td>
-            </tr>
+    // 🚨 ESTILO NEGRO SÓLIDO FORZADO 🚨
+    const inputStyle = 'background-color: #121520 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1) !important; padding: 18px 24px !important; border-radius: 12px !important; font-size: 18px !important;';
+
+    function createRow(desc = '', cant = 1, prec = '') {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><input type="text" class="form-control" name="descripcion" placeholder="Descripción del servicio..." value="${desc}" style="${inputStyle}"></td>
+            <td><input type="number" class="form-control item-calc text-center" name="cantidad" value="${cant}" min="1" style="${inputStyle}"></td>
+            <td><input type="number" class="form-control item-calc" name="precio" placeholder="0.00" value="${prec}" step="0.01" min="0" style="${inputStyle}"></td>
+            <td class="total-col text-info fw-bold" style="vertical-align: middle; padding-left: 15px; font-family: \'Bebas Neue\'; font-size: 24px;">${formatCurrency((cant * (prec || 0)))}</td>
+            <td style="vertical-align: middle;"><button type="button" class="btn btn-sm btn-outline-danger border-0 remove-row"><i class="bi bi-trash fs-4"></i></button></td>
         `;
-        tableBody.innerHTML = firstRowHTML;
+        return row;
+    }
+
+    function initTable() {
+        tableBody.innerHTML = '';
+        tableBody.appendChild(createRow());
+        updateTotals();
     }
 
     document.getElementById('add-row-btn').addEventListener('click', function() {
-        const newRow = document.createElement('tr');
-        newRow.innerHTML = `
-            <td><input type="text" class="form-control" name="descripcion" placeholder="Descripción del servicio o producto"></td>
-            <td><input type="number" class="form-control item-calc" name="cantidad" value="1" min="1"></td>
-            <td><input type="number" class="form-control item-calc" name="precio" placeholder="0.00" step="0.01" min="0"></td>
-            <td><input type="text" class="form-control item-total" readonly value="$0.00"></td>
-            <td><button type="button" class="btn btn-danger btn-sm remove-row"><i class="bi bi-trash"></i></button></td>
-        `;
-        tableBody.appendChild(newRow);
+        tableBody.appendChild(createRow());
         hideDownloadButtons();
     });
 
-    document.getElementById('fecha').valueAsDate = new Date();
-    createFirstRow();
-    updateTotals();
+    window.agregarProducto = function(n, d, p) {
+        const newRow = createRow(d, 1, p);
+        tableBody.appendChild(newRow);
+        const modal = document.getElementById('productosModal');
+        if (modal) {
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+            if (modalInstance) modalInstance.hide();
+        }
+        updateTotals();
+    };
+
+    if (document.getElementById('fecha')) document.getElementById('fecha').valueAsDate = new Date();
+    initTable();
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -108,17 +123,10 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'ok') {
-                alert(data.message);
-                
-                const pdfLink = document.getElementById('pdf-download-link');
-                const excelLink = document.getElementById('excel-download-link');
-                
-                pdfLink.href = `/descargar-pdf/${data.cotizacion_id}`;
-                excelLink.href = `/descargar-excel/${data.cotizacion_id}`;
-                
+                alert('Cotización Guardada Exitosamente');
+                document.getElementById('pdf-download-link').href = `/descargar-pdf/${data.cotizacion_id}`;
+                document.getElementById('excel-download-link').href = `/descargar-excel/${data.cotizacion_id}`;
                 showDownloadButtons();
-            } else {
-                alert('Error: ' + data.message);
             }
         })
         .catch(error => console.error('Error:', error));
